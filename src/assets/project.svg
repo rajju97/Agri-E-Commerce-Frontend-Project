@@ -1,0 +1,33 @@
+<svg width="300" height="300" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+  <!-- Green leaf branches -->
+  <g fill="none" stroke="#4CAF50" stroke-width="3" transform="translate(30, 40)">
+    <path d="M0,20 Q10,10 20,0" />
+    <path d="M0,40 Q15,20 30,0" />
+    <path d="M0,60 Q20,30 40,0" />
+    <path d="M0,80 Q25,40 50,0" />
+    <path d="M0,100 Q30,50 60,0" />
+  </g>
+  <g fill="none" stroke="#4CAF50" stroke-width="3" transform="translate(240, 40) scale(-1, 1)">
+    <path d="M0,20 Q10,10 20,0" />
+    <path d="M0,40 Q15,20 30,0" />
+    <path d="M0,60 Q20,30 40,0" />
+    <path d="M0,80 Q25,40 50,0" />
+    <path d="M0,100 Q30,50 60,0" />
+  </g>
+  
+  <!-- GAIF Text -->
+  <text x="150" y="120" font-size="48" font-weight="bold" text-anchor="middle" fill="#4CAF50">GAIF</text>
+  
+  <!-- Bowl -->
+  <ellipse cx="150" cy="160" rx="50" ry="20" fill="#4CAF50" />
+  
+  <!-- Wheat Stalks -->
+  <path d="M150,130 L145,155 M150,130 L155,155 M150,130 L150,155" stroke="#4CAF50" stroke-width="2"/>
+  <path d="M145,155 Q140,150 138,145 M155,155 Q160,150 162,145" stroke="#4CAF50" stroke-width="1.5"/>
+
+  <!-- Subtitle -->
+  <text x="150" y="190" font-size="12" font-weight="bold" text-anchor="middle" fill="#D32F2F">GANGA AGRI INNOVATION FOUNDATION</text>
+
+  <!-- Slogan -->
+  <text x="150" y="210" font-size="12" font-weight="bold" text-anchor="middle" fill="#D32F2F">FOOD IS THE RIGHT OF HUMAN BEING</text>
+</svg>
