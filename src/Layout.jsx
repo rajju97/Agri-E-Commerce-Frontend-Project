@@ -1,15 +1,15 @@
 import { useState } from "react";
 import { useDispatch } from 'react-redux';
-import { addItem,removeItem } from "./dispatchers";
+import { addItem, removeItem } from "./dispatchers";
 
 export default function Layout() {
     const [activeCategory, setActiveCategory] = useState(null);
     const dispatch = useDispatch();
     const [productList, setProductList] = useState([
-        { name: "Organic Fertilizer", price: 1199, image: "src/assets/product-jpeg-500x500.webp", quantity: 0, id:'1' },
-        { name: "Organic Seeds", price: 299, image: "src/assets/product-jpeg-500x500.webp", quantity: 0, id:'2' },
-        { name: "Organic Grains", price: 99, image: "src/assets/product-jpeg-500x500.webp", quantity: 0,id:'3' },
-        { name: "Compost", price: 199, image: "src/assets/product-jpeg-500x500.webp", quantity: 0,id:'4' },
+        { name: "Organic Fertilizer", price: 1199, image: "product-jpeg-500x500.webp", quantity: 0, id: '1' },
+        { name: "Organic Seeds", price: 299, image: "product-jpeg-500x500.webp", quantity: 0, id: '2' },
+        { name: "Organic Grains", price: 99, image: "product-jpeg-500x500.webp", quantity: 0, id: '3' },
+        { name: "Compost", price: 199, image: "product-jpeg-500x500.webp", quantity: 0, id: '4' },
     ]);
 
     const categories = [
@@ -58,7 +58,7 @@ export default function Layout() {
                 {/* Founder Image and Caption */}
                 <div className="flex flex-col items-center md:items-start">
                     <div className="w-32 h-32 md:w-48 md:h-48 overflow-hidden rounded-full border-4 border-white mb-2">
-                        <img src="src/assets/founder.jpg" alt="Founder" className="w-full h-full object-cover" />
+                        <img src='founder.jpg' alt="Founder" className="w-full h-full object-cover" />
                     </div>
                     <i>Dr. Satyapal Singh</i>
                     <p className="text-sm md:text-base font-semibold">Founder and President of GAIF</p>
@@ -124,7 +124,7 @@ export default function Layout() {
                                     </div>
                                 )}
                                 {product.quantity > 0 && (
-                                    <div onClick={()=>handleRemoveCart(product)} className="absolute top-2 cursor-pointer right-8 bg-error text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">
+                                    <div onClick={() => handleRemoveCart(product)} className="absolute top-2 cursor-pointer right-8 bg-error text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">
                                         <span><i className="fas fa-trash" aria-hidden="true"></i></span>
                                     </div>
                                 )}
