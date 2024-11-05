@@ -1,5 +1,5 @@
 
-import {  useDispatch, useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import './App.css'
 import Layout from './Layout'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
@@ -14,20 +14,20 @@ function App() {
 
   const showLoader = useSelector((state) => state.showLoader)
   const dispatch = useDispatch()
-  useEffect(()=>{
-    const timer = setTimeout(()=>{
+  useEffect(() => {
+    const timer = setTimeout(() => {
       dispatch(stopLoader())
-    },2000)
+    }, 2000)
 
     return () => clearTimeout(timer)
-  },[dispatch])
+  }, [dispatch])
 
   return (
 
-    
-      <BrowserRouter>
 
-        {showLoader ? <Loader /> :
+    <BrowserRouter>
+
+      {showLoader ? <Loader /> :
         <div className="bg-cream min-h-screen text-soil">
           <NavBar></NavBar>
           <Routes>
@@ -40,8 +40,8 @@ function App() {
             <Route path="*" element={<NotFound />} />
           </Routes>
         </div>
-        }
-      </BrowserRouter>
+      }
+    </BrowserRouter>
 
 
   )
