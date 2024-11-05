@@ -7,8 +7,8 @@ export default {
     themes: [{
       light: {
         primary: '#4CAF50',
-        secondary: '#FFA726',
-        accent: '#FFA726',
+        secondary: '#1e3778',
+        accent: '#1e3778',
         neutral: '#3D4451',
         'base-100': '#FFFFFF',
         info: '#3ABFF8',
@@ -29,7 +29,7 @@ export default {
         soil: '#795548',
         sand: '#A1887F',
         cream: '#FAF9F6',
-        accent: '#FFA726',
+        accent: '#1e3778',
         darkGreen: '#2E7D32',
       },
     },

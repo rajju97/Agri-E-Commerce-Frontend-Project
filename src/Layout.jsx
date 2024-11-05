@@ -1,9 +1,16 @@
 import { useState } from "react";
-import { useNavigate, NavLink } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { addItem,removeItem } from "./dispatchers";
 
 export default function Layout() {
     const [activeCategory, setActiveCategory] = useState(null);
-    const [cartCount, setCartCount] = useState(0);
+    const dispatch = useDispatch();
+    const [productList, setProductList] = useState([
+        { name: "Organic Fertilizer", price: 1199, image: "src/assets/product-jpeg-500x500.webp", quantity: 0, id:'1' },
+        { name: "Organic Seeds", price: 299, image: "src/assets/product-jpeg-500x500.webp", quantity: 0, id:'2' },
+        { name: "Organic Grains", price: 99, image: "src/assets/product-jpeg-500x500.webp", quantity: 0,id:'3' },
+        { name: "Compost", price: 199, image: "src/assets/product-jpeg-500x500.webp", quantity: 0,id:'4' },
+    ]);
 
     const categories = [
         { name: "Fertilizers", description: "Improve soil fertility naturally." },
@@ -12,84 +19,59 @@ export default function Layout() {
         { name: "Compost", description: "Compost for enhancing soil nutrients." },
     ];
 
+
+
     const handleCategoryClick = (categoryName) => {
         setActiveCategory(categoryName === activeCategory ? null : categoryName);
     };
 
-    const navigate = useNavigate();
-
-    const handleNavigation = (path) => {
-        //navigate to the specified path
-        navigate(path);
+    const addItemToCart = (product) => {
+        setProductList((old) => old.map((item) => {
+            if (item.name === product.name) {
+                return { ...item, quantity: item.quantity + 1 };
+            }
+            return item;
+        }));
+        ;
+        dispatch(addItem(product));
     };
 
+    const handleRemoveCart = (product) => {
+        setProductList((old) => old.map((item) => {
+            if (item.name === product.name) {
+                return { ...item, quantity: item.quantity - 1 };
+            }
+            return item;
+        }));
+        ;
+        dispatch(removeItem(product));
+    };
+
+
+
+
     return (
-        <div className="bg-cream min-h-screen text-soil">
-            {/* Header */}
-            <header className="bg-primary text-white p-2 flex justify-between items-center">
-                <h1 onClick={()=>handleNavigation('/')} className="text-2xl font-bold flex items-center cursor-pointer">
-                    <img src="/project.svg" alt="AgriMarket Logo" className="h-16 bg-white rounded-full w-16 mr-2" />
-                    AgriMarket
-                </h1>
-                <nav className="space-x-4 flex items-center">
-                    <NavLink
-                        to="/"
-                        className={({ isActive }) => isActive ? "text-accent font-bold" : "hover:text-accent"}
-                    >
-                        Home
-                    </NavLink>
-                    <NavLink
-                        to="/products"
-                        className={({ isActive }) => isActive ? "text-accent font-bold" : "hover:text-accent"}
-                    >
-                        Products
-                    </NavLink>
-                    <NavLink
-                        to="/register"
-                        className={({ isActive }) => isActive ? "text-accent font-bold" : "hover:text-accent"}
-                    >
-                        Register
-                    </NavLink>
-                    <NavLink
-                        to="/about-us"
-                        className={({ isActive }) => isActive ? "text-accent font-bold" : "hover:text-accent"}
-                    >
-                        About Us
-                    </NavLink>
-                    <NavLink
-                        to="/contact"
-                        className={({ isActive }) => isActive ? "text-accent font-bold" : "hover:text-accent"}
-                    >
-                        Contact
-                    </NavLink>
-                    <NavLink
-                        to="/seller-login"
-                        className={({ isActive }) => isActive ? "text-accent font-bold" : "hover:text-accent"}
-                    >
-                        Seller Login
-                    </NavLink>
-                    {/* Cart with Icon and Badge */}
-                    <div className="relative">
-                        <NavLink to="/cart" className="hover:text-accent flex items-center space-x-2">
-                            <i className="fas fa-shopping-cart"></i> {/* Font Awesome Cart Icon */}
-                            <span>Cart</span>
-                        </NavLink>
-                        {cartCount > 0 && (
-                            <span className="absolute -top-2 -right-2 bg-accent text-white rounded-full text-xs w-5 h-5 flex items-center justify-center">
-                                {cartCount}
-                            </span>
-                        )}
-                    </div>
-                </nav>
-            </header>
-
+        <>
             {/* Banner Section */}
-            <section className="bg-accent text-white p-10 text-center">
-                <h2 className="text-3xl font-bold mb-4">Fresh From the Farm</h2>
-                <p className="mb-6">High-quality organic products for a sustainable future.</p>
-                <button className="bg-primary hover:bg-darkGreen text-white px-6 py-2 rounded">Shop Now</button>
-            </section>
+            <section className="bg-accent text-white p-10 flex flex-col md:flex-row items-center justify-center text-center md:text-left space-y-6 md:space-y-0">
 
+                {/* Founder Image and Caption */}
+                <div className="flex flex-col items-center md:items-start">
+                    <div className="w-32 h-32 md:w-48 md:h-48 overflow-hidden rounded-full border-4 border-white mb-2">
+                        <img src="src/assets/founder.jpg" alt="Founder" className="w-full h-full object-cover" />
+                    </div>
+                    <i>Dr. Satyapal Singh</i>
+                    <p className="text-sm md:text-base font-semibold">Founder and President of GAIF</p>
+                </div>
+
+                {/* Banner Text */}
+                <div className="md:ml-6">
+                    <h2 className="text-3xl font-bold mb-2">Fresh From the Farm</h2>
+                    <p className="mb-4">High-quality organic products for a sustainable future.</p>
+                    <button className="bg-primary hover:bg-darkGreen text-white px-6 py-2 rounded">Shop Now</button>
+                </div>
+
+            </section>
             {/* Categories Section */}
             <section className="p-6">
                 <h2 className="text-2xl font-bold text-center mb-6">Categories</h2>
@@ -105,7 +87,7 @@ export default function Layout() {
 
                             {/* Popover */}
                             {activeCategory === category.name && (
-                                <div className="absolute top-full mt-2 left-0 right-0 bg-white border border-gray-300 rounded shadow-lg p-4">
+                                <div className="absolute top-full z-10 mt-2 left-0 right-0 bg-white border border-gray-300 rounded shadow-lg p-4">
                                     <div className="absolute -top-2.5 left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-8 border-l-transparent border-r-8 border-r-transparent border-b-8 border-b-gray-300"></div>
                                     <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-8 border-l-transparent border-r-8 border-r-transparent border-b-8 border-b-white"></div>
 
@@ -128,12 +110,27 @@ export default function Layout() {
                 <h2 className="text-2xl font-bold text-center mb-6">Featured Products</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     {/* Sample Product Card */}
-                    <div className="bg-white p-4 rounded shadow-lg">
-                        <img src="sample-product.jpg" alt="Product" className="w-full h-32 object-cover mb-4 rounded" />
-                        <h3 className="text-lg font-semibold">Organic Fertilizer</h3>
-                        <p className="text-sm text-gray-700 mb-2">$12.99</p>
-                        <button className="bg-accent text-white px-4 py-2 rounded hover:bg-primary">Add to Cart</button>
-                    </div>
+                    {productList && productList.length > 0 && productList.map((product) => {
+                        return (
+                            <div key={product.name} className="bg-white p-4 rounded shadow-lg transform transition-transform duration-300 hover:scale-105">
+                                <img src={product.image} alt={product.name} className="w-full h-48 object-cover mb-4" />
+                                <h3 className="text-lg font-semibold">{product.name}</h3>
+                                <p className="text-sm text-gray-700 mb-2"> &#8377; {product.price}</p>
+                                <button onClick={() => addItemToCart(product)} className="bg-accent text-white px-4 py-2 rounded hover:bg-primary">Add to Cart</button>
+                                {/* Quantity Badge (Visible only if quantity > 0) */}
+                                {product.quantity > 0 && (
+                                    <div className="absolute top-2 right-2 bg-primary text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">
+                                        {product.quantity}
+                                    </div>
+                                )}
+                                {product.quantity > 0 && (
+                                    <div onClick={()=>handleRemoveCart(product)} className="absolute top-2 cursor-pointer right-8 bg-error text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">
+                                        <span><i className="fas fa-trash" aria-hidden="true"></i></span>
+                                    </div>
+                                )}
+                            </div>
+                        )
+                    })}
                     {/* Repeat Product Cards as Needed */}
                 </div>
             </section>
@@ -159,12 +156,12 @@ export default function Layout() {
 
             {/* Footer */}
             <footer className="bg-soil text-white p-4 text-center">
-                <p>&copy; 2024 AgriMarket. All rights reserved.</p>
+                <p>&copy; 2024 Ganga Agri Innovation Foundation. All rights reserved.</p>
                 <div className="space-x-4 mt-2">
                     <a href="#" className="hover:text-accent">Privacy Policy</a>
                     <a href="#" className="hover:text-accent">Terms of Service</a>
                 </div>
             </footer>
-        </div>
+        </>
     );
 }
