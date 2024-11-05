@@ -17,7 +17,7 @@ const NavBar = () => {
             {/* Header */}
             <header className="bg-primary text-white p-4 flex justify-between items-center">
                 <h1 onClick={() => handleNavigation('/')} className="text-2xl font-bold flex items-center cursor-pointer">
-                    <img src="src/assets/gaif_logo.jpeg" alt="AgriMarket Logo" className="h-16 bg-white rounded-full w-16 mr-2" />
+                    <img src="gaif_logo.jpeg" alt="AgriMarket Logo" className="h-16 bg-white rounded-full w-16 mr-2" />
                     <span className='hidden md:inline'>
                     Ganga Agri Innovation Foundation
                     </span>
