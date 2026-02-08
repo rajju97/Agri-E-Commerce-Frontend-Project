@@ -1,15 +1,28 @@
 import {useState} from 'react'
 import { useSelector } from 'react-redux';
 import { useNavigate, NavLink } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const NavBar = () => {
     const navigate = useNavigate();
     const itemCount = useSelector((state) => state.cart.itemCount);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // State for mobile menu
+    const { currentUser, userRole, logout } = useAuth();
+
     const handleNavigation = (path) => {
         //navigate to the specified path
         navigate(path);
         setIsMobileMenuOpen(false);
+    };
+
+    const handleLogout = async () => {
+        try {
+            await logout();
+            navigate('/');
+            setIsMobileMenuOpen(false);
+        } catch (error) {
+            console.error("Failed to logout", error);
+        }
     };
 
     return (
@@ -34,18 +47,41 @@ const NavBar = () => {
                     <NavLink to="/products" className={({ isActive }) => isActive ? "text-accent font-bold" : "hover:text-accent"}>
                         Products
                     </NavLink>
-                    <NavLink to="/register" className={({ isActive }) => isActive ? "text-accent font-bold" : "hover:text-accent"}>
-                        Register
-                    </NavLink>
+
+                    {/* Role Based Links */}
+                    {currentUser && userRole === 'seller' && (
+                        <NavLink to="/seller-dashboard" className={({ isActive }) => isActive ? "text-accent font-bold" : "hover:text-accent"}>
+                            Seller Dashboard
+                        </NavLink>
+                    )}
+                    {currentUser && userRole === 'admin' && (
+                        <NavLink to="/admin-dashboard" className={({ isActive }) => isActive ? "text-accent font-bold" : "hover:text-accent"}>
+                            Admin Dashboard
+                        </NavLink>
+                    )}
+
                     <NavLink to="/about-us" className={({ isActive }) => isActive ? "text-accent font-bold" : "hover:text-accent"}>
                         About Us
                     </NavLink>
                     <NavLink to="/contact" className={({ isActive }) => isActive ? "text-accent font-bold" : "hover:text-accent"}>
                         Contact
                     </NavLink>
-                    <NavLink to="/seller-login" className={({ isActive }) => isActive ? "text-accent font-bold" : "hover:text-accent"}>
-                        Seller Login
-                    </NavLink>
+
+                    {!currentUser ? (
+                        <>
+                            <NavLink to="/login" className={({ isActive }) => isActive ? "text-accent font-bold" : "hover:text-accent"}>
+                                Login
+                            </NavLink>
+                            <NavLink to="/register" className={({ isActive }) => isActive ? "text-accent font-bold" : "hover:text-accent"}>
+                                Register
+                            </NavLink>
+                        </>
+                    ) : (
+                        <button onClick={handleLogout} className="hover:text-accent">
+                            Logout
+                        </button>
+                    )}
+
                     <div className="relative">
                         <NavLink to="/cart" className="hover:text-accent flex items-center space-x-2">
                             <i className="fas fa-shopping-cart"></i>
@@ -74,18 +110,40 @@ const NavBar = () => {
                     <NavLink to="/products" onClick={() => handleNavigation('/products')} className="hover:text-accent">
                         Products
                     </NavLink>
-                    <NavLink to="/register" onClick={() => handleNavigation('/register')} className="hover:text-accent">
-                        Register
-                    </NavLink>
+
+                    {currentUser && userRole === 'seller' && (
+                         <NavLink to="/seller-dashboard" onClick={() => handleNavigation('/seller-dashboard')} className="hover:text-accent">
+                             Seller Dashboard
+                         </NavLink>
+                    )}
+                    {currentUser && userRole === 'admin' && (
+                         <NavLink to="/admin-dashboard" onClick={() => handleNavigation('/admin-dashboard')} className="hover:text-accent">
+                             Admin Dashboard
+                         </NavLink>
+                    )}
+
                     <NavLink to="/about-us" onClick={() => handleNavigation('/about-us')} className="hover:text-accent">
                         About Us
                     </NavLink>
                     <NavLink to="/contact" onClick={() => handleNavigation('/contact')} className="hover:text-accent">
                         Contact
                     </NavLink>
-                    <NavLink to="/seller-login" onClick={() => handleNavigation('/seller-login')} className="hover:text-accent">
-                        Seller Login
-                    </NavLink>
+
+                    {!currentUser ? (
+                        <>
+                             <NavLink to="/login" onClick={() => handleNavigation('/login')} className="hover:text-accent">
+                                 Login
+                             </NavLink>
+                             <NavLink to="/register" onClick={() => handleNavigation('/register')} className="hover:text-accent">
+                                 Register
+                             </NavLink>
+                        </>
+                    ) : (
+                        <button onClick={handleLogout} className="hover:text-accent">
+                            Logout
+                        </button>
+                    )}
+
                     <NavLink to="/cart" onClick={() => handleNavigation('/cart')} className="hover:text-accent flex items-center">
                         <i className="fas fa-shopping-cart mr-2"></i> Cart
                         {itemCount > 0 && (

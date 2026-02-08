@@ -1,16 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useDispatch } from 'react-redux';
 import { addItem, removeItem } from "./dispatchers";
+import { getProducts } from "./services/db";
 
 export default function Layout() {
     const [activeCategory, setActiveCategory] = useState(null);
     const dispatch = useDispatch();
-    const [productList, setProductList] = useState([
-        { name: "Organic Fertilizer", price: 1199, image: "product-jpeg-500x500.webp", quantity: 0, id: '1' },
-        { name: "Organic Seeds", price: 299, image: "product-jpeg-500x500.webp", quantity: 0, id: '2' },
-        { name: "Organic Grains", price: 99, image: "product-jpeg-500x500.webp", quantity: 0, id: '3' },
-        { name: "Compost", price: 199, image: "product-jpeg-500x500.webp", quantity: 0, id: '4' },
-    ]);
+    const [productList, setProductList] = useState([]);
 
     const categories = [
         { name: "Fertilizers", description: "Improve soil fertility naturally." },
@@ -19,6 +15,24 @@ export default function Layout() {
         { name: "Compost", description: "Compost for enhancing soil nutrients." },
     ];
 
+    useEffect(() => {
+        const fetchProducts = async () => {
+            try {
+                const products = await getProducts();
+                // Initialize local UI state for cart interaction.
+                // map DB 'quantity' to 'stock' and initialize 'quantity' (cart) to 0.
+                const mappedProducts = products.map(p => ({
+                    ...p,
+                    stock: p.quantity,
+                    quantity: 0
+                }));
+                setProductList(mappedProducts);
+            } catch (error) {
+                console.error("Failed to fetch products", error);
+            }
+        };
+        fetchProducts();
+    }, []);
 
 
     const handleCategoryClick = (categoryName) => {
@@ -27,27 +41,24 @@ export default function Layout() {
 
     const addItemToCart = (product) => {
         setProductList((old) => old.map((item) => {
-            if (item.name === product.name) {
+            if (item.id === product.id) {
                 return { ...item, quantity: item.quantity + 1 };
             }
             return item;
         }));
-        ;
         dispatch(addItem(product));
     };
 
     const handleRemoveCart = (product) => {
         setProductList((old) => old.map((item) => {
-            if (item.name === product.name) {
-                return { ...item, quantity: item.quantity - 1 };
+            if (item.id === product.id) {
+                const newQty = item.quantity - 1;
+                return { ...item, quantity: newQty < 0 ? 0 : newQty };
             }
             return item;
         }));
-        ;
         dispatch(removeItem(product));
     };
-
-
 
 
     return (
@@ -110,27 +121,31 @@ export default function Layout() {
                 <h2 className="text-2xl font-bold text-center mb-6">Featured Products</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     {/* Sample Product Card */}
-                    {productList && productList.length > 0 && productList.map((product) => {
+                    {productList && productList.length > 0 ? productList.map((product) => {
                         return (
-                            <div key={product.name} className="bg-white p-4 rounded shadow-lg transform transition-transform duration-300 hover:scale-105">
-                                <img src={product.image} alt={product.name} className="w-full h-48 object-cover mb-4" />
+                            <div key={product.id} className="bg-white p-4 rounded shadow-lg transform transition-transform duration-300 hover:scale-105 flex flex-col justify-between">
+                                <div>
+                                <img src={product.image || "product-jpeg-500x500.webp"} alt={product.name} className="w-full h-48 object-cover mb-4" />
                                 <h3 className="text-lg font-semibold">{product.name}</h3>
                                 <p className="text-sm text-gray-700 mb-2"> &#8377; {product.price}</p>
-                                <button onClick={() => addItemToCart(product)} className="bg-accent text-white px-4 py-2 rounded hover:bg-primary">Add to Cart</button>
+                                </div>
+                                <div className="relative">
+                                <button onClick={() => addItemToCart(product)} className="bg-accent text-white px-4 py-2 rounded hover:bg-primary w-full">Add to Cart</button>
                                 {/* Quantity Badge (Visible only if quantity > 0) */}
                                 {product.quantity > 0 && (
-                                    <div className="absolute top-2 right-2 bg-primary text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">
+                                    <div className="absolute -top-12 right-0 bg-primary text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">
                                         {product.quantity}
                                     </div>
                                 )}
                                 {product.quantity > 0 && (
-                                    <div onClick={() => handleRemoveCart(product)} className="absolute top-2 cursor-pointer right-8 bg-error text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">
+                                    <div onClick={() => handleRemoveCart(product)} className="absolute -top-12 right-8 bg-error text-white rounded-full w-6 h-6 flex items-center justify-center text-xs cursor-pointer">
                                         <span><i className="fas fa-trash" aria-hidden="true"></i></span>
                                     </div>
                                 )}
+                                </div>
                             </div>
                         )
-                    })}
+                    }) : <p className="col-span-full text-center py-10">No products available. Log in as a Seller to add some!</p>}
                     {/* Repeat Product Cards as Needed */}
                 </div>
             </section>
