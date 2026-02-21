@@ -25,12 +25,13 @@ const RegistrationPage = () => {
     setError('');
     setSubmitting(true);
     try {
-      // Set role BEFORE signup so the version counter increments
-      // before onAuthStateChanged fires and tries to read Firestore
-      setUserRole(data.role);
-
       const userCredential = await signup(data.email, data.password);
       const user = userCredential.user;
+
+      // Set role AFTER signup returns — onAuthStateChanged has already
+      // captured versionAtStart=0 by now, so this increment to 1 will
+      // cause its in-flight Firestore read to be discarded
+      setUserRole(data.role);
 
       // Save user role and details to Firestore
       await setDoc(doc(db, "users", user.uid), {
