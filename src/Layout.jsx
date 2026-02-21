@@ -50,7 +50,7 @@ export default function Layout() {
                             High-quality organic products for a sustainable future.
                             Direct from farmers to your doorstep.
                         </p>
-                        <p className="text-sm mb-6 opacity-75">
+                        <p className="text-sm mb-6 opacity-75 drop-shadow">
                             Join thousands of happy customers and farmers on our platform.
                         </p>
                         <div className="flex flex-wrap gap-3 justify-center md:justify-start">
