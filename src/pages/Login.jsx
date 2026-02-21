@@ -7,15 +7,15 @@ import { db } from '../firebase';
 
 const Login = () => {
   const { register, handleSubmit, formState: { errors } } = useForm();
-  const { login, currentUser, userRole } = useAuth();
+  const { login, currentUser, userRole, setUserRole } = useAuth();
   const navigate = useNavigate();
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
 
   // Redirect already logged-in users away from login page
-  // (but not while showing success message)
-  if (currentUser && !success) {
+  // (but not while submitting or showing success message)
+  if (currentUser && !success && !submitting) {
     if (userRole === 'seller') return <Navigate to="/seller-dashboard" />;
     if (userRole === 'admin') return <Navigate to="/admin-dashboard" />;
     return <Navigate to="/" />;
@@ -34,6 +34,9 @@ const Login = () => {
       if (userDoc.exists()) {
         role = userDoc.data().role;
       }
+
+      // Sync role to context (onAuthStateChanged may not have resolved yet)
+      setUserRole(role);
 
       // Show success message then redirect
       setSuccess(true);

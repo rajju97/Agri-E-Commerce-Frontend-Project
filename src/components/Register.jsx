@@ -14,8 +14,8 @@ const RegistrationPage = () => {
   const [success, setSuccess] = useState(false);
 
   // Redirect already logged-in users away from registration page
-  // (but not while showing success message)
-  if (currentUser && !success) {
+  // (but not while submitting or showing success message)
+  if (currentUser && !success && !submitting) {
     if (userRole === 'seller') return <Navigate to="/seller-dashboard" />;
     if (userRole === 'admin') return <Navigate to="/admin-dashboard" />;
     return <Navigate to="/" />;
