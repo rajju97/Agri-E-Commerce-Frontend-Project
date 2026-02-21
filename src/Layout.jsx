@@ -44,7 +44,7 @@ export default function Layout() {
             {/* Hero Banner */}
             <section
                 className="relative bg-cover bg-center bg-no-repeat text-white py-24 px-6"
-                style={{ backgroundImage: "url('/hero-bg.jpg')" }}
+                style={{ backgroundImage: "url('https://media.istockphoto.com/id/2194044791/photo/young-green-sprouts-emerging-from-freshly-tilled-soil-at-sunrise-symbolizing-growth-new.jpg?s=612x612&w=0&k=20&c=9HrC8bQ38OPIVrBiqTNbu5j9zfY6k9rgyUKN1EabGVw=')" }}
             >
                 <div className="absolute inset-0 bg-black/50"></div>
                 <div className="relative container mx-auto flex flex-col md:flex-row items-center justify-center gap-8">
