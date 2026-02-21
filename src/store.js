@@ -6,7 +6,7 @@ export const initialState = {
         items: [],
         itemCount: 0,
     },
-    showLoader: true,
+    showLoader: false,
 };
 
 const store = createStore(cartReducer);
