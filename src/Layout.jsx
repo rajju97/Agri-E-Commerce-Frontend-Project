@@ -43,16 +43,8 @@ export default function Layout() {
         <>
             {/* Hero Banner */}
             <section className="bg-gradient-to-r from-accent to-blue-800 text-white py-16 px-6">
-                <div className="container mx-auto flex flex-col md:flex-row items-center justify-center gap-8">
-                    <div className="flex flex-col items-center">
-                        <div className="w-32 h-32 md:w-40 md:h-40 overflow-hidden rounded-full border-4 border-white shadow-lg mb-3">
-                            <img src="founder.jpg" alt="Founder" className="w-full h-full object-cover" />
-                        </div>
-                        <p className="italic text-sm">Dr. Satyapal Singh</p>
-                        <p className="text-xs font-semibold opacity-80">Founder & President, GAIF</p>
-                    </div>
-
-                    <div className="text-center md:text-left max-w-lg">
+                <div className="container mx-auto flex flex-col items-center justify-center">
+                    <div className="text-center max-w-lg">
                         <h2 className="text-4xl font-bold mb-3">Fresh From the Farm</h2>
                         <p className="text-lg mb-2 opacity-90">
                             High-quality organic products for a sustainable future.
