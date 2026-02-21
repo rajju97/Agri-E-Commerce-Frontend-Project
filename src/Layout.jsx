@@ -42,18 +42,22 @@ export default function Layout() {
     return (
         <>
             {/* Hero Banner */}
-            <section className="bg-gradient-to-r from-accent to-blue-800 text-white py-16 px-6">
-                <div className="container mx-auto flex flex-col items-center justify-center">
-                    <div className="text-center max-w-lg">
-                        <h2 className="text-4xl font-bold mb-3">Fresh From the Farm</h2>
-                        <p className="text-lg mb-2 opacity-90">
+            <section
+                className="relative bg-cover bg-center bg-no-repeat bg-gradient-to-r from-accent to-blue-800 text-white py-24 px-6"
+                style={{ backgroundImage: "url('https://media.istockphoto.com/id/2194044791/photo/young-green-sprouts-emerging-from-freshly-tilled-soil-at-sunrise-symbolizing-growth-new.jpg?s=612x612&w=0&k=20&c=9HrC8bQ38OPIVrBiqTNbu5j9zfY6k9rgyUKN1EabGVw=')" }}
+            >
+                <div className="absolute inset-0 bg-black/50"></div>
+                <div className="relative container mx-auto flex flex-col items-center text-center">
+                    <div className="max-w-lg">
+                        <h2 className="text-4xl font-bold mb-3 drop-shadow-lg">Fresh From the Farm</h2>
+                        <p className="text-lg mb-2 opacity-90 drop-shadow">
                             High-quality organic products for a sustainable future.
                             Direct from farmers to your doorstep.
                         </p>
                         <p className="text-sm mb-6 opacity-75 drop-shadow">
                             Join thousands of happy customers and farmers on our platform.
                         </p>
-                        <div className="flex flex-wrap gap-3 justify-center md:justify-start">
+                        <div className="flex flex-wrap gap-3 justify-center">
                             <button onClick={() => navigate('/products')} className="bg-primary hover:bg-darkGreen text-white px-6 py-3 rounded-lg font-semibold transition-colors">
                                 <i className="fas fa-shopping-bag mr-2"></i>Shop Now
                             </button>
