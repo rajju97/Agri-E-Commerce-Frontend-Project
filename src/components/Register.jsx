@@ -7,7 +7,7 @@ import { useState } from 'react';
 
 const RegistrationPage = () => {
   const { register, handleSubmit, watch, formState: { errors } } = useForm();
-  const { signup, currentUser, userRole } = useAuth();
+  const { signup, currentUser, userRole, setUserRole } = useAuth();
   const navigate = useNavigate();
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -35,6 +35,10 @@ const RegistrationPage = () => {
         role: data.role,
         uid: user.uid
       });
+
+      // Update context with the correct role (onAuthStateChanged may have
+      // fired before the Firestore doc was written, defaulting to 'customer')
+      setUserRole(data.role);
 
       // Show success message then redirect
       setSuccess(true);
@@ -98,9 +102,11 @@ const RegistrationPage = () => {
             <label className="block text-white mb-2" htmlFor="role">Role</label>
             <select
               id="role"
+              defaultValue=""
               className={`select select-bordered w-full ${errors.role ? 'border-red-500' : ''}`}
               {...register('role', { required: 'Role is required' })}
             >
+              <option value="" disabled>Select your role</option>
               <option value="customer">Customer</option>
               <option value="seller">Seller</option>
             </select>
