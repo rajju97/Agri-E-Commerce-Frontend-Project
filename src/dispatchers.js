@@ -1,27 +1,23 @@
-import { ADD_ITEM, REMOVE_ITEM, SHOW_LOADER, STOP_LOADER } from "./actions";
+import { ADD_ITEM, REMOVE_ITEM, CLEAR_CART, SHOW_LOADER, STOP_LOADER } from "./actions";
 
-export const addItem = (item) => {
-    return {
-        type: ADD_ITEM,
-        payload: item,
-    };
-};
+export const addItem = (item) => ({
+    type: ADD_ITEM,
+    payload: item,
+});
 
-export const removeItem = (item) => {
-    return {
-        type: REMOVE_ITEM,
-        payload: item,
-    };
-};
-export const showLoader = () => {
-    return {
-        type: SHOW_LOADER,
-        payload: true,
-    };
-};
-export const stopLoader = () => {
-    return {
-        type: STOP_LOADER,
-        payload: false,
-    };
-};
+export const removeItem = (item) => ({
+    type: REMOVE_ITEM,
+    payload: item,
+});
+
+export const clearCart = () => ({
+    type: CLEAR_CART,
+});
+
+export const showLoader = () => ({
+    type: SHOW_LOADER,
+});
+
+export const stopLoader = () => ({
+    type: STOP_LOADER,
+});

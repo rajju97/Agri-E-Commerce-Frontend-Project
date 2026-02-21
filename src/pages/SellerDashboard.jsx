@@ -1,55 +1,50 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { getProducts, addProduct, deleteProduct } from '../services/db';
+import { getProducts, addProduct, deleteProduct, updateProduct, getOrdersBySeller } from '../services/db';
 import { generateProductDescription, generateProductImage } from '../services/ai';
 
 const SellerDashboard = () => {
   const { currentUser } = useAuth();
+  const navigate = useNavigate();
   const [products, setProducts] = useState([]);
+  const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [genType, setGenType] = useState(null);
+  const [editingId, setEditingId] = useState(null);
+  const [activeTab, setActiveTab] = useState('products');
 
-  // Form State
   const [formData, setFormData] = useState({
     name: '',
     description: '',
     price: '',
     image: '',
-    quantity: 0
+    quantity: 0,
+    category: 'Other',
   });
 
-  // Load Products
-  useEffect(() => {
-    const loadProducts = async () => {
-      setLoading(true);
-      try {
-        const data = await getProducts(currentUser.uid);
-        setProducts(data);
-      } catch (error) {
-        console.error("Error loading products:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const categories = ['Fertilizers', 'Seeds', 'Grains', 'Compost', 'Tools', 'Other'];
 
+  useEffect(() => {
     if (currentUser) {
-      loadProducts();
+      loadData();
     }
   }, [currentUser]);
 
-  // Helper for manual reload (e.g. after add/delete)
-  const reloadProducts = async () => {
-    if (currentUser) {
-        setLoading(true);
-        try {
-          const data = await getProducts(currentUser.uid);
-          setProducts(data);
-        } catch (error) {
-          console.error("Error reloading products:", error);
-        } finally {
-          setLoading(false);
-        }
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      const [productsData, ordersData] = await Promise.all([
+        getProducts(currentUser.uid),
+        getOrdersBySeller(currentUser.uid),
+      ]);
+      setProducts(productsData);
+      setOrders(ordersData);
+    } catch (error) {
+      console.error("Error loading data:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -62,13 +57,13 @@ const SellerDashboard = () => {
     if (!formData.name) return alert("Please enter a product name first.");
     setGenerating(true); setGenType('desc');
     try {
-        const desc = await generateProductDescription(`Write a short, engaging product description for: ${formData.name}. Keep it under 100 words.`);
-        setFormData(prev => ({ ...prev, description: desc }));
+      const desc = await generateProductDescription(`Write a short, engaging product description for: ${formData.name}. Keep it under 100 words.`);
+      setFormData(prev => ({ ...prev, description: desc }));
     } catch (error) {
-        console.error(error);
-        alert("Failed to generate description.");
+      console.error(error);
+      alert("Failed to generate description.");
     } finally {
-        setGenerating(false); setGenType(null);
+      setGenerating(false); setGenType(null);
     }
   };
 
@@ -76,180 +71,226 @@ const SellerDashboard = () => {
     if (!formData.name) return alert("Please enter a product name first.");
     setGenerating(true); setGenType('image');
     try {
-        const imageUrl = await generateProductImage(`High quality, organic, fresh ${formData.name}`);
-        setFormData(prev => ({ ...prev, image: imageUrl }));
+      const imageUrl = await generateProductImage(`High quality, organic, fresh ${formData.name}`);
+      setFormData(prev => ({ ...prev, image: imageUrl }));
     } catch (error) {
-        console.error(error);
-        alert("Failed to generate image.");
+      console.error(error);
+      alert("Failed to generate image.");
     } finally {
-        setGenerating(false); setGenType(null);
+      setGenerating(false); setGenType(null);
     }
   };
 
-  const handleAddProduct = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!currentUser) return;
+
     try {
-        await addProduct({
-            ...formData,
-            price: Number(formData.price),
-            quantity: Number(formData.quantity),
-            sellerId: currentUser.uid,
-            sellerEmail: currentUser.email
+      if (editingId) {
+        await updateProduct(editingId, {
+          name: formData.name,
+          description: formData.description,
+          price: Number(formData.price),
+          quantity: Number(formData.quantity),
+          image: formData.image,
+          category: formData.category,
         });
-        alert("Product added successfully!");
-        setFormData({ name: '', description: '', price: '', image: '', quantity: 0 });
-        reloadProducts();
+        alert("Product updated!");
+        setEditingId(null);
+      } else {
+        await addProduct({
+          ...formData,
+          price: Number(formData.price),
+          quantity: Number(formData.quantity),
+          sellerId: currentUser.uid,
+          sellerEmail: currentUser.email,
+        });
+        alert("Product added!");
+      }
+      setFormData({ name: '', description: '', price: '', image: '', quantity: 0, category: 'Other' });
+      loadData();
     } catch (error) {
-        console.error(error);
-        alert("Failed to add product.");
+      console.error(error);
+      alert("Failed to save product.");
     }
+  };
+
+  const handleEdit = (product) => {
+    setEditingId(product.id);
+    setFormData({
+      name: product.name || '',
+      description: product.description || '',
+      price: product.price || '',
+      image: product.image || '',
+      quantity: product.quantity || 0,
+      category: product.category || 'Other',
+    });
+    setActiveTab('products');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setFormData({ name: '', description: '', price: '', image: '', quantity: 0, category: 'Other' });
   };
 
   const handleDelete = async (id) => {
     if (confirm("Are you sure you want to delete this product?")) {
-        try {
-            await deleteProduct(id);
-            reloadProducts();
-        } catch (error) {
-            console.error(error);
-            alert("Failed to delete product.");
-        }
+      try {
+        await deleteProduct(id);
+        loadData();
+      } catch (error) {
+        console.error(error);
+        alert("Failed to delete product.");
+      }
     }
   };
 
+  // Stats
+  const totalRevenue = orders.filter(o => o.status === 'delivered').reduce((sum, o) => sum + (o.total || 0), 0);
+  const pendingOrders = orders.filter(o => o.status === 'pending').length;
+
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-6">Seller Dashboard</h1>
+      <div className="flex flex-wrap justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">Seller Dashboard</h1>
+        <button onClick={() => navigate('/seller-orders')} className="btn btn-primary btn-sm">
+          <i className="fas fa-box mr-2"></i> Manage Orders
+          {pendingOrders > 0 && <span className="badge badge-warning ml-2">{pendingOrders}</span>}
+        </button>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div className="bg-white p-4 rounded-lg shadow text-center">
+          <p className="text-2xl font-bold text-primary">{products.length}</p>
+          <p className="text-sm text-gray-500">Products</p>
+        </div>
+        <div className="bg-white p-4 rounded-lg shadow text-center">
+          <p className="text-2xl font-bold text-blue-600">{orders.length}</p>
+          <p className="text-sm text-gray-500">Total Orders</p>
+        </div>
+        <div className="bg-white p-4 rounded-lg shadow text-center">
+          <p className="text-2xl font-bold text-yellow-600">{pendingOrders}</p>
+          <p className="text-sm text-gray-500">Pending</p>
+        </div>
+        <div className="bg-white p-4 rounded-lg shadow text-center">
+          <p className="text-2xl font-bold text-green-600">&#8377;{totalRevenue.toFixed(0)}</p>
+          <p className="text-sm text-gray-500">Revenue</p>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-
-        {/* Add Product Form */}
+        {/* Add/Edit Product Form */}
         <div className="bg-white p-6 rounded shadow-md h-fit">
-           <h2 className="text-xl font-semibold mb-4">Add New Product</h2>
-           <form onSubmit={handleAddProduct} className="space-y-4">
-                <div>
-                    <label className="block text-sm font-medium">Product Name</label>
-                    <input
-                        type="text"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleInputChange}
-                        className="input input-bordered w-full"
-                        required
-                    />
-                </div>
+          <h2 className="text-xl font-semibold mb-4">
+            {editingId ? 'Edit Product' : 'Add New Product'}
+          </h2>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium">Product Name</label>
+              <input type="text" name="name" value={formData.name}
+                onChange={handleInputChange} className="input input-bordered w-full" required />
+            </div>
 
-                {/* AI Buttons Row */}
-                <div className="flex flex-wrap gap-2">
-                    <button
-                        type="button"
-                        onClick={handleGenerateDesc}
-                        disabled={generating}
-                        className="btn btn-sm btn-accent text-white"
-                    >
-                        {generating && genType==='desc' ? 'Generating...' : 'Generate Description (Gemini)'}
-                    </button>
-                    <button
-                        type="button"
-                        onClick={handleGenerateImage}
-                        disabled={generating}
-                        className="btn btn-sm btn-secondary text-white"
-                    >
-                        {generating && genType==='image' ? 'Generating...' : 'Generate Image (AI)'}
-                    </button>
-                </div>
+            <div>
+              <label className="block text-sm font-medium">Category</label>
+              <select name="category" value={formData.category}
+                onChange={handleInputChange} className="select select-bordered w-full">
+                {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+              </select>
+            </div>
 
-                <div>
-                    <label className="block text-sm font-medium">Description</label>
-                    <textarea
-                        name="description"
-                        value={formData.description}
-                        onChange={handleInputChange}
-                        className="textarea textarea-bordered w-full"
-                        required
-                        rows="3"
-                    ></textarea>
-                </div>
+            <div className="flex flex-wrap gap-2">
+              <button type="button" onClick={handleGenerateDesc} disabled={generating}
+                className="btn btn-sm btn-accent text-white">
+                {generating && genType === 'desc' ? 'Generating...' : 'AI Description'}
+              </button>
+              <button type="button" onClick={handleGenerateImage} disabled={generating}
+                className="btn btn-sm btn-secondary text-white">
+                {generating && genType === 'image' ? 'Generating...' : 'AI Image'}
+              </button>
+            </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                    <div>
-                        <label className="block text-sm font-medium">Price (₹)</label>
-                        <input
-                            type="number"
-                            name="price"
-                            value={formData.price}
-                            onChange={handleInputChange}
-                            className="input input-bordered w-full"
-                            required
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium">Quantity</label>
-                        <input
-                            type="number"
-                            name="quantity"
-                            value={formData.quantity}
-                            onChange={handleInputChange}
-                            className="input input-bordered w-full"
-                            required
-                        />
-                    </div>
-                </div>
+            <div>
+              <label className="block text-sm font-medium">Description</label>
+              <textarea name="description" value={formData.description}
+                onChange={handleInputChange} className="textarea textarea-bordered w-full"
+                required rows="3" />
+            </div>
 
-                <div>
-                    <label className="block text-sm font-medium">Image URL</label>
-                    <input
-                        type="text"
-                        name="image"
-                        value={formData.image}
-                        onChange={handleInputChange}
-                        className="input input-bordered w-full"
-                        placeholder="https://..."
-                    />
-                    {formData.image && (
-                        <img
-                            src={formData.image}
-                            alt="Preview"
-                            className="mt-2 h-32 w-32 object-cover rounded border"
-                        />
-                    )}
-                </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium">Price (&#8377;)</label>
+                <input type="number" name="price" value={formData.price}
+                  onChange={handleInputChange} className="input input-bordered w-full" required />
+              </div>
+              <div>
+                <label className="block text-sm font-medium">Quantity</label>
+                <input type="number" name="quantity" value={formData.quantity}
+                  onChange={handleInputChange} className="input input-bordered w-full" required />
+              </div>
+            </div>
 
-                <button type="submit" className="btn btn-primary w-full">Add Product</button>
-            </form>
+            <div>
+              <label className="block text-sm font-medium">Image URL</label>
+              <input type="text" name="image" value={formData.image}
+                onChange={handleInputChange} className="input input-bordered w-full"
+                placeholder="https://..." />
+              {formData.image && (
+                <img src={formData.image} alt="Preview"
+                  className="mt-2 h-32 w-32 object-cover rounded border" />
+              )}
+            </div>
+
+            <div className="flex gap-2">
+              <button type="submit" className="btn btn-primary flex-1">
+                {editingId ? 'Update Product' : 'Add Product'}
+              </button>
+              {editingId && (
+                <button type="button" onClick={handleCancelEdit} className="btn btn-ghost">
+                  Cancel
+                </button>
+              )}
+            </div>
+          </form>
         </div>
 
         {/* Product List */}
         <div className="bg-white p-6 rounded shadow-md h-fit">
-           <h2 className="text-xl font-semibold mb-4">Your Products</h2>
-           {loading ? <p>Loading...</p> : (
-               products.length === 0 ? <p className="text-gray-500">No products added yet.</p> : (
-                   <div className="space-y-4 max-h-[800px] overflow-y-auto pr-2">
-                       {products.map(product => (
-                           <div key={product.id} className="flex flex-col sm:flex-row items-center justify-between p-4 border rounded shadow-sm hover:bg-gray-50 gap-4">
-                               <div className="flex items-center gap-4 w-full">
-                                   <img
-                                       src={product.image || 'https://placehold.co/100'}
-                                       alt={product.name}
-                                       className="w-16 h-16 object-cover rounded"
-                                   />
-                                   <div className="flex-1">
-                                       <h3 className="font-semibold">{product.name}</h3>
-                                       <p className="text-sm text-gray-500 line-clamp-1">{product.description}</p>
-                                       <p className="text-sm font-bold mt-1">₹{product.price} | Qty: {product.quantity}</p>
-                                   </div>
-                               </div>
-                               <button
-                                   onClick={() => handleDelete(product.id)}
-                                   className="btn btn-sm btn-error text-white whitespace-nowrap"
-                               >
-                                   Delete
-                               </button>
-                           </div>
-                       ))}
-                   </div>
-               )
-           )}
+          <h2 className="text-xl font-semibold mb-4">Your Products ({products.length})</h2>
+          {loading ? <p>Loading...</p> : (
+            products.length === 0 ? <p className="text-gray-500">No products added yet.</p> : (
+              <div className="space-y-4 max-h-[800px] overflow-y-auto pr-2">
+                {products.map(product => (
+                  <div key={product.id} className="flex flex-col sm:flex-row items-center justify-between p-4 border rounded shadow-sm hover:bg-gray-50 gap-4">
+                    <div className="flex items-center gap-4 w-full">
+                      <img src={product.image || 'product-jpeg-500x500.webp'} alt={product.name}
+                        className="w-16 h-16 object-cover rounded" />
+                      <div className="flex-1">
+                        <h3 className="font-semibold">{product.name}</h3>
+                        <p className="text-sm text-gray-500 line-clamp-1">{product.description}</p>
+                        <p className="text-sm font-bold mt-1">&#8377;{product.price} | Qty: {product.quantity}</p>
+                        {product.category && (
+                          <span className="badge badge-sm badge-ghost">{product.category}</span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <button onClick={() => handleEdit(product)}
+                        className="btn btn-sm btn-primary whitespace-nowrap">
+                        <i className="fas fa-edit"></i>
+                      </button>
+                      <button onClick={() => handleDelete(product.id)}
+                        className="btn btn-sm btn-error text-white whitespace-nowrap">
+                        <i className="fas fa-trash"></i>
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )
+          )}
         </div>
       </div>
     </div>
