@@ -1,5 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { storage } from '../firebase';
 import { useAuth } from '../context/AuthContext';
 import { getProducts, addProduct, deleteProduct, updateProduct, getOrdersBySeller } from '../services/db';
 import { generateProductDescription, generateProductImage } from '../services/ai';
@@ -14,6 +16,8 @@ const SellerDashboard = () => {
   const [genType, setGenType] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [activeTab, setActiveTab] = useState('products');
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef(null);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -81,6 +85,35 @@ const SellerDashboard = () => {
     }
   };
 
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    if (!allowedTypes.includes(file.type)) {
+      alert('Please select a valid image file (JPEG, PNG, WebP, or GIF).');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Image size must be less than 5MB.');
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const fileName = `products/${currentUser.uid}/${Date.now()}_${file.name}`;
+      const storageRef = ref(storage, fileName);
+      await uploadBytes(storageRef, file);
+      const downloadURL = await getDownloadURL(storageRef);
+      setFormData(prev => ({ ...prev, image: downloadURL }));
+    } catch (error) {
+      console.error('Upload failed:', error);
+      alert('Failed to upload image. Please try again.');
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!currentUser) return;
@@ -108,6 +141,7 @@ const SellerDashboard = () => {
         alert("Product added!");
       }
       setFormData({ name: '', description: '', price: '', image: '', quantity: 0, category: 'Other' });
+      if (fileInputRef.current) fileInputRef.current.value = '';
       loadData();
     } catch (error) {
       console.error(error);
@@ -132,6 +166,7 @@ const SellerDashboard = () => {
   const handleCancelEdit = () => {
     setEditingId(null);
     setFormData({ name: '', description: '', price: '', image: '', quantity: 0, category: 'Other' });
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const handleDelete = async (id) => {
@@ -233,10 +268,25 @@ const SellerDashboard = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium">Image URL</label>
+              <label className="block text-sm font-medium mb-1">Product Image</label>
+              <div className="flex flex-wrap gap-2 mb-2">
+                <button type="button" onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading}
+                  className="btn btn-sm btn-outline btn-primary">
+                  <i className="fas fa-upload mr-1"></i>
+                  {uploading ? 'Uploading...' : 'Upload Image'}
+                </button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                />
+              </div>
               <input type="text" name="image" value={formData.image}
                 onChange={handleInputChange} className="input input-bordered w-full"
-                placeholder="https://..." />
+                placeholder="Or paste image URL here..." />
               {formData.image && (
                 <img src={formData.image} alt="Preview"
                   className="mt-2 h-32 w-32 object-cover rounded border" />
