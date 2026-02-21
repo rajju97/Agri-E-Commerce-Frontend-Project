@@ -1,4 +1,3 @@
-import { useDispatch, useSelector } from 'react-redux'
 import './App.css'
 import Layout from './Layout'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
@@ -16,9 +15,6 @@ import OrderHistory from './pages/OrderHistory'
 import Profile from './pages/Profile'
 import AboutUs from './pages/AboutUs'
 import Contact from './pages/Contact'
-import Loader from './components/Loader'
-import { useEffect } from 'react'
-import { stopLoader } from './dispatchers'
 import NotFound from './components/NotFound'
 import { useAuth } from './context/AuthContext'
 
@@ -40,22 +36,11 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
 };
 
 function App() {
-  const showLoader = useSelector((state) => state.showLoader)
-  const dispatch = useDispatch()
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      dispatch(stopLoader())
-    }, 2000)
-    return () => clearTimeout(timer)
-  }, [dispatch])
-
   return (
     <BrowserRouter>
-      {showLoader ? <Loader /> :
-        <div className="bg-cream min-h-screen text-soil">
-          <NavBar />
-          <Routes>
+      <div className="bg-cream min-h-screen text-soil">
+        <NavBar />
+        <Routes>
             {/* Public Routes */}
             <Route path="/" element={<Layout />} />
             <Route path="/products" element={<ProductsPage />} />
@@ -105,8 +90,7 @@ function App() {
             {/* 404 */}
             <Route path="*" element={<NotFound />} />
           </Routes>
-        </div>
-      }
+      </div>
     </BrowserRouter>
   )
 }

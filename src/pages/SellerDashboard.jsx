@@ -15,8 +15,8 @@ const SellerDashboard = () => {
   const [generating, setGenerating] = useState(false);
   const [genType, setGenType] = useState(null);
   const [editingId, setEditingId] = useState(null);
-  const [activeTab, setActiveTab] = useState('products');
   const [uploading, setUploading] = useState(false);
+  const [saving, setSaving] = useState(false);
   const fileInputRef = useRef(null);
 
   const [formData, setFormData] = useState({
@@ -116,8 +116,12 @@ const SellerDashboard = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!currentUser) return;
+    if (!currentUser) {
+      alert("You must be logged in to add products. Please log in again.");
+      return;
+    }
 
+    setSaving(true);
     try {
       if (editingId) {
         await updateProduct(editingId, {
@@ -144,8 +148,10 @@ const SellerDashboard = () => {
       if (fileInputRef.current) fileInputRef.current.value = '';
       loadData();
     } catch (error) {
-      console.error(error);
-      alert("Failed to save product.");
+      console.error("Failed to save product:", error);
+      alert("Failed to save product. " + (error.message || ''));
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -159,7 +165,6 @@ const SellerDashboard = () => {
       quantity: product.quantity || 0,
       category: product.category || 'Other',
     });
-    setActiveTab('products');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -294,8 +299,9 @@ const SellerDashboard = () => {
             </div>
 
             <div className="flex gap-2">
-              <button type="submit" className="btn btn-primary flex-1">
-                {editingId ? 'Update Product' : 'Add Product'}
+              <button type="submit" className="btn btn-primary flex-1" disabled={saving || uploading}>
+                {saving ? <><span className="loading loading-spinner loading-sm mr-2"></span>Saving...</> :
+                  editingId ? 'Update Product' : 'Add Product'}
               </button>
               {editingId && (
                 <button type="button" onClick={handleCancelEdit} className="btn btn-ghost">
