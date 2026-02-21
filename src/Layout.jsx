@@ -42,8 +42,12 @@ export default function Layout() {
     return (
         <>
             {/* Hero Banner */}
-            <section className="bg-gradient-to-r from-accent to-blue-800 text-white py-16 px-6">
-                <div className="container mx-auto flex flex-col md:flex-row items-center justify-center gap-8">
+            <section
+                className="relative bg-cover bg-center bg-no-repeat text-white py-24 px-6"
+                style={{ backgroundImage: "url('/hero-bg.jpg')" }}
+            >
+                <div className="absolute inset-0 bg-black/50"></div>
+                <div className="relative container mx-auto flex flex-col md:flex-row items-center justify-center gap-8">
                     <div className="flex flex-col items-center">
                         <div className="w-32 h-32 md:w-40 md:h-40 overflow-hidden rounded-full border-4 border-white shadow-lg mb-3">
                             <img src="founder.jpg" alt="Founder" className="w-full h-full object-cover" />
@@ -53,12 +57,12 @@ export default function Layout() {
                     </div>
 
                     <div className="text-center md:text-left max-w-lg">
-                        <h2 className="text-4xl font-bold mb-3">Fresh From the Farm</h2>
-                        <p className="text-lg mb-2 opacity-90">
+                        <h2 className="text-4xl font-bold mb-3 drop-shadow-lg">Fresh From the Farm</h2>
+                        <p className="text-lg mb-2 opacity-90 drop-shadow">
                             High-quality organic products for a sustainable future.
                             Direct from farmers to your doorstep.
                         </p>
-                        <p className="text-sm mb-6 opacity-75">
+                        <p className="text-sm mb-6 opacity-75 drop-shadow">
                             Join thousands of happy customers and farmers on our platform.
                         </p>
                         <div className="flex flex-wrap gap-3 justify-center md:justify-start">
