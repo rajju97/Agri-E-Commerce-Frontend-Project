@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState, useRef } from 'react';
 import { auth, db } from '../firebase';
 import {
   createUserWithEmailAndPassword,
@@ -20,6 +20,12 @@ export function AuthProvider({ children }) {
   const [userRole, setUserRole] = useState(null); // 'admin', 'seller', 'customer'
   const [loading, setLoading] = useState(true);
 
+  // Version counter to prevent onAuthStateChanged from overwriting
+  // a role that was already set by Login/Register components.
+  // When setUserRole is called manually, the version increments so any
+  // in-flight Firestore read from onAuthStateChanged is discarded.
+  const roleVersionRef = useRef(0);
+
   async function signup(email, password) {
     return createUserWithEmailAndPassword(auth, email, password);
   }
@@ -32,22 +38,31 @@ export function AuthProvider({ children }) {
     return signOut(auth);
   }
 
+  function updateUserRole(role) {
+    roleVersionRef.current++;
+    setUserRole(role);
+  }
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setCurrentUser(user);
       if (user) {
-        // Fetch user role from Firestore
+        const versionAtStart = roleVersionRef.current;
         try {
           const userDoc = await getDoc(doc(db, "users", user.uid));
-          if (userDoc.exists()) {
-            setUserRole(userDoc.data().role);
-          } else {
-            // Default to customer if no role found (or handle as error)
-            setUserRole('customer');
+          // Only update role if no manual override happened during the fetch
+          if (roleVersionRef.current === versionAtStart) {
+            if (userDoc.exists()) {
+              setUserRole(userDoc.data().role);
+            } else {
+              setUserRole('customer');
+            }
           }
         } catch (error) {
           console.error("Error fetching user role:", error);
-          setUserRole('customer');
+          if (roleVersionRef.current === versionAtStart) {
+            setUserRole('customer');
+          }
         }
       } else {
         setUserRole(null);
@@ -61,7 +76,7 @@ export function AuthProvider({ children }) {
   const value = {
     currentUser,
     userRole,
-    setUserRole,
+    setUserRole: updateUserRole,
     signup,
     login,
     logout

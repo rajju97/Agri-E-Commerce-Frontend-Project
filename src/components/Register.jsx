@@ -25,6 +25,10 @@ const RegistrationPage = () => {
     setError('');
     setSubmitting(true);
     try {
+      // Set role BEFORE signup so the version counter increments
+      // before onAuthStateChanged fires and tries to read Firestore
+      setUserRole(data.role);
+
       const userCredential = await signup(data.email, data.password);
       const user = userCredential.user;
 
@@ -36,11 +40,7 @@ const RegistrationPage = () => {
         uid: user.uid
       });
 
-      // Update context with the correct role (onAuthStateChanged may have
-      // fired before the Firestore doc was written, defaulting to 'customer')
-      setUserRole(data.role);
-
-      // Show success message then redirect
+      // Show success message briefly then redirect
       setSuccess(true);
       setTimeout(() => {
         if (data.role === 'seller') {
@@ -48,7 +48,7 @@ const RegistrationPage = () => {
         } else {
           navigate('/');
         }
-      }, 1500);
+      }, 500);
 
     } catch (err) {
       console.error(err);

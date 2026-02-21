@@ -28,17 +28,17 @@ const Login = () => {
       const userCredential = await login(data.email, data.password);
       const user = userCredential.user;
 
-      // Determine role and redirect
+      // Read role from Firestore and set it immediately.
+      // setUserRole increments a version counter that causes
+      // onAuthStateChanged's in-flight Firestore read to be discarded.
       const userDoc = await getDoc(doc(db, "users", user.uid));
       let role = 'customer';
       if (userDoc.exists()) {
         role = userDoc.data().role;
       }
-
-      // Sync role to context (onAuthStateChanged may not have resolved yet)
       setUserRole(role);
 
-      // Show success message then redirect
+      // Show success message briefly then redirect
       setSuccess(true);
       setTimeout(() => {
         if (role === 'admin') {
@@ -48,7 +48,7 @@ const Login = () => {
         } else {
           navigate('/');
         }
-      }, 1500);
+      }, 500);
 
     } catch (err) {
       console.error(err);
