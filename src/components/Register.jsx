@@ -1,5 +1,5 @@
 import { useForm } from 'react-hook-form';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { db } from '../firebase';
 import { doc, setDoc } from 'firebase/firestore';
@@ -7,12 +7,23 @@ import { useState } from 'react';
 
 const RegistrationPage = () => {
   const { register, handleSubmit, watch, formState: { errors } } = useForm();
-  const { signup } = useAuth();
+  const { signup, currentUser, userRole } = useAuth();
   const navigate = useNavigate();
   const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [success, setSuccess] = useState(false);
+
+  // Redirect already logged-in users away from registration page
+  // (but not while showing success message)
+  if (currentUser && !success) {
+    if (userRole === 'seller') return <Navigate to="/seller-dashboard" />;
+    if (userRole === 'admin') return <Navigate to="/admin-dashboard" />;
+    return <Navigate to="/" />;
+  }
 
   const onSubmit = async (data) => {
     setError('');
+    setSubmitting(true);
     try {
       const userCredential = await signup(data.email, data.password);
       const user = userCredential.user;
@@ -25,18 +36,35 @@ const RegistrationPage = () => {
         uid: user.uid
       });
 
-      // Redirect based on role
-      if (data.role === 'seller') {
-        navigate('/seller-dashboard');
-      } else {
-        navigate('/');
-      }
+      // Show success message then redirect
+      setSuccess(true);
+      setTimeout(() => {
+        if (data.role === 'seller') {
+          navigate('/seller-dashboard');
+        } else {
+          navigate('/');
+        }
+      }, 1500);
 
     } catch (err) {
       console.error(err);
       setError('Failed to create account. ' + err.message);
+      setSubmitting(false);
     }
   };
+
+  if (success) {
+    return (
+      <div className="bg-blue-900 flex items-center justify-center min-h-screen">
+        <div className="bg-blue-800 bg-opacity-75 p-8 rounded-lg shadow-lg w-full max-w-md text-center">
+          <div className="text-green-400 text-5xl mb-4"><i className="fas fa-check-circle"></i></div>
+          <h2 className="text-2xl font-bold text-white mb-2">Registration Successful!</h2>
+          <p className="text-gray-300">Redirecting you now...</p>
+          <span className="loading loading-spinner loading-md text-white mt-4"></span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-blue-900 flex items-center justify-center min-h-screen">
@@ -104,8 +132,10 @@ const RegistrationPage = () => {
             {errors.rewritePassword && <p className="text-red-500 text-sm mt-1">{errors.rewritePassword.message}</p>}
           </div>
           <div className="flex justify-between mb-2">
-            <button type="submit" className="btn btn-primary">Register</button>
-            <button type="reset" className="btn btn-accent">Reset</button>
+            <button type="submit" className="btn btn-primary" disabled={submitting}>
+              {submitting ? <><span className="loading loading-spinner loading-sm mr-2"></span>Registering...</> : 'Register'}
+            </button>
+            <button type="reset" className="btn btn-accent" disabled={submitting}>Reset</button>
           </div>
           <div>
             <small className='text-white'>Already Registered, <NavLink to={'/login'} className="text-black hover:text-primary">please login</NavLink></small>
