@@ -42,23 +42,11 @@ export default function Layout() {
     return (
         <>
             {/* Hero Banner */}
-            <section
-                className="relative bg-cover bg-center bg-no-repeat text-white py-24 px-6"
-                style={{ backgroundImage: "url('https://media.istockphoto.com/id/2194044791/photo/young-green-sprouts-emerging-from-freshly-tilled-soil-at-sunrise-symbolizing-growth-new.jpg?s=612x612&w=0&k=20&c=9HrC8bQ38OPIVrBiqTNbu5j9zfY6k9rgyUKN1EabGVw=')" }}
-            >
-                <div className="absolute inset-0 bg-black/50"></div>
-                <div className="relative container mx-auto flex flex-col md:flex-row items-center justify-center gap-8">
-                    <div className="flex flex-col items-center">
-                        <div className="w-32 h-32 md:w-40 md:h-40 overflow-hidden rounded-full border-4 border-white shadow-lg mb-3">
-                            <img src="founder.jpg" alt="Founder" className="w-full h-full object-cover" />
-                        </div>
-                        <p className="italic text-sm">Dr. Satyapal Singh</p>
-                        <p className="text-xs font-semibold opacity-80">Founder & President, GAIF</p>
-                    </div>
-
-                    <div className="text-center md:text-left max-w-lg">
-                        <h2 className="text-4xl font-bold mb-3 drop-shadow-lg">Fresh From the Farm</h2>
-                        <p className="text-lg mb-2 opacity-90 drop-shadow">
+            <section className="bg-gradient-to-r from-accent to-blue-800 text-white py-16 px-6">
+                <div className="container mx-auto flex flex-col items-center justify-center">
+                    <div className="text-center max-w-lg">
+                        <h2 className="text-4xl font-bold mb-3">Fresh From the Farm</h2>
+                        <p className="text-lg mb-2 opacity-90">
                             High-quality organic products for a sustainable future.
                             Direct from farmers to your doorstep.
                         </p>
