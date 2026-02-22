@@ -24,17 +24,28 @@ export const generateProductDescription = async (prompt) => {
 };
 
 export const generateProductImage = async (prompt) => {
-  // Currently, the Google Generative AI JS SDK does not support direct text-to-image generation
-  // in the same way as text-to-text. It typically requires Vertex AI or other endpoints.
-  // This is a placeholder that simulates the "Nanobana" (or Gemini) image generation request.
-
-  console.log("Generating image for:", prompt);
-
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 2000));
-
-  // Return a placeholder image based on keywords (simple mock logic)
-  // In a real implementation, this would fetch from an image generation API.
-
-  return `https://placehold.co/500x500?text=${encodeURIComponent(prompt.substring(0, 20))}`;
+  if (!genAI) {
+    console.warn("Gemini API Key is missing.");
+    return `https://placehold.co/500x500?text=${encodeURIComponent('No API Key')}`;
+  }
+  try {
+    const model = genAI.getGenerativeModel({
+      model: "gemini-2.0-flash-exp",
+      generationConfig: {
+        responseModalities: ["Text", "Image"],
+      },
+    });
+    const result = await model.generateContent(prompt);
+    const parts = result.response.candidates[0].content.parts;
+    for (const part of parts) {
+      if (part.inlineData) {
+        const { data, mimeType } = part.inlineData;
+        return `data:${mimeType};base64,${data}`;
+      }
+    }
+    throw new Error('No image returned by the model');
+  } catch (error) {
+    console.error("Error generating image:", error);
+    throw error;
+  }
 };
