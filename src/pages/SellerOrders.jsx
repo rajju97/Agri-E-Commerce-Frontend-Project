@@ -150,6 +150,18 @@ const SellerOrders = () => {
                                     </div>
                                 )}
 
+                                <div className="text-sm text-gray-500 mb-4 p-3 bg-gray-50 rounded">
+                                    <p className="font-medium text-gray-700 flex items-center gap-2">
+                                        Payment: {order.paymentMethod === 'online' ? 'Online' : 'Cash on Delivery'}
+                                        {order.paymentStatus === 'paid' && (
+                                            <span className="badge badge-success badge-sm text-white">Paid</span>
+                                        )}
+                                    </p>
+                                    {order.paymentId && (
+                                        <p className="text-xs text-gray-400 mt-1">Txn: {order.paymentId}</p>
+                                    )}
+                                </div>
+
                                 <div className="flex flex-wrap justify-between items-center">
                                     <p className="text-lg font-bold text-primary">Total: &#8377;{order.total?.toFixed(2)}</p>
                                     <div className="flex gap-2">
