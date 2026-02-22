@@ -94,7 +94,15 @@ const OrderHistory = () => {
 
                             <div className="flex justify-between items-center">
                                 <div className="text-sm text-gray-500">
-                                    <p>Payment: {order.paymentMethod?.toUpperCase()}</p>
+                                    <p className="flex items-center gap-2">
+                                        Payment: {order.paymentMethod === 'online' ? 'Online' : 'Cash on Delivery'}
+                                        {order.paymentStatus === 'paid' && (
+                                            <span className="badge badge-success badge-sm text-white">Paid</span>
+                                        )}
+                                    </p>
+                                    {order.paymentId && (
+                                        <p className="text-xs text-gray-400">Txn: {order.paymentId}</p>
+                                    )}
                                     {order.shippingAddress && (
                                         <p>Ship to: {order.shippingAddress.city}, {order.shippingAddress.state}</p>
                                     )}

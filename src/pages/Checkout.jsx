@@ -5,6 +5,47 @@ import { useAuth } from '../context/AuthContext';
 import { createOrder } from '../services/db';
 import { clearCart } from '../dispatchers';
 
+const RAZORPAY_KEY = import.meta.env.VITE_RAZORPAY_KEY_ID;
+
+const initiateRazorpayPayment = ({ amount, buyerEmail, buyerPhone, buyerName }) => {
+    return new Promise((resolve, reject) => {
+        if (!window.Razorpay) {
+            reject(new Error('Razorpay SDK not loaded. Please refresh and try again.'));
+            return;
+        }
+
+        const options = {
+            key: RAZORPAY_KEY,
+            amount: Math.round(amount * 100), // amount in paise
+            currency: 'INR',
+            name: 'Gai Foundation',
+            description: 'Order Payment',
+            prefill: {
+                email: buyerEmail,
+                contact: buyerPhone,
+                name: buyerName,
+            },
+            theme: {
+                color: '#4CAF50',
+            },
+            handler: (response) => {
+                resolve(response);
+            },
+            modal: {
+                ondismiss: () => {
+                    reject(new Error('Payment cancelled by user.'));
+                },
+            },
+        };
+
+        const rzp = new window.Razorpay(options);
+        rzp.on('payment.failed', (response) => {
+            reject(new Error(response.error?.description || 'Payment failed. Please try again.'));
+        });
+        rzp.open();
+    });
+};
+
 const Checkout = () => {
     const cartItems = useSelector((state) => state.cart.items);
     const dispatch = useDispatch();
@@ -37,6 +78,33 @@ const Checkout = () => {
         setPlacing(true);
 
         try {
+            let paymentId = null;
+            let paymentStatus = 'cod';
+
+            // Handle online payment via Razorpay
+            if (formData.paymentMethod === 'online') {
+                if (!RAZORPAY_KEY) {
+                    alert('Payment gateway is not configured. Please contact support.');
+                    setPlacing(false);
+                    return;
+                }
+
+                try {
+                    const paymentResponse = await initiateRazorpayPayment({
+                        amount: totalPrice,
+                        buyerEmail: currentUser.email,
+                        buyerPhone: formData.phone,
+                        buyerName: formData.fullName,
+                    });
+                    paymentId = paymentResponse.razorpay_payment_id;
+                    paymentStatus = 'paid';
+                } catch (paymentError) {
+                    alert(paymentError.message);
+                    setPlacing(false);
+                    return;
+                }
+            }
+
             // Group items by seller
             const sellerGroups = {};
             cartItems.forEach(item => {
@@ -72,6 +140,8 @@ const Checkout = () => {
                         pincode: formData.pincode,
                     },
                     paymentMethod: formData.paymentMethod,
+                    paymentStatus,
+                    paymentId,
                 });
                 lastOrderId = orderRef.id;
             }
@@ -183,21 +253,20 @@ const Checkout = () => {
                                     checked={formData.paymentMethod === 'cod'}
                                     onChange={handleChange}
                                     className="radio radio-primary" />
-                                <span><i className="fas fa-money-bill-wave mr-2"></i> Cash on Delivery</span>
+                                <div>
+                                    <span className="font-medium"><i className="fas fa-money-bill-wave mr-2"></i> Cash on Delivery</span>
+                                    <p className="text-xs text-gray-500 ml-6">Pay when your order is delivered</p>
+                                </div>
                             </label>
-                            <label className="flex items-center gap-3 p-3 border rounded cursor-pointer hover:bg-gray-50">
-                                <input type="radio" name="paymentMethod" value="upi"
-                                    checked={formData.paymentMethod === 'upi'}
+                            <label className={`flex items-center gap-3 p-3 border rounded cursor-pointer hover:bg-gray-50 ${formData.paymentMethod === 'online' ? 'border-primary bg-green-50' : ''}`}>
+                                <input type="radio" name="paymentMethod" value="online"
+                                    checked={formData.paymentMethod === 'online'}
                                     onChange={handleChange}
                                     className="radio radio-primary" />
-                                <span><i className="fas fa-mobile-alt mr-2"></i> UPI Payment</span>
-                            </label>
-                            <label className="flex items-center gap-3 p-3 border rounded cursor-pointer hover:bg-gray-50">
-                                <input type="radio" name="paymentMethod" value="card"
-                                    checked={formData.paymentMethod === 'card'}
-                                    onChange={handleChange}
-                                    className="radio radio-primary" />
-                                <span><i className="fas fa-credit-card mr-2"></i> Credit / Debit Card</span>
+                                <div>
+                                    <span className="font-medium"><i className="fas fa-credit-card mr-2"></i> Pay Online</span>
+                                    <p className="text-xs text-gray-500 ml-6">UPI, Credit/Debit Card, Net Banking, Wallets</p>
+                                </div>
                             </label>
                         </div>
                     </div>
@@ -233,7 +302,9 @@ const Checkout = () => {
 
                         <button type="submit" disabled={placing} className="btn btn-primary w-full">
                             {placing ? (
-                                <><span className="loading loading-spinner loading-sm"></span> Placing Order...</>
+                                <><span className="loading loading-spinner loading-sm"></span> Processing...</>
+                            ) : formData.paymentMethod === 'online' ? (
+                                'Pay & Place Order'
                             ) : (
                                 'Place Order'
                             )}
