@@ -77,7 +77,7 @@ const OrderHistory = () => {
                                 {order.items?.map((item, idx) => (
                                     <div key={idx} className="flex items-center gap-3">
                                         <img
-                                            src={item.image || 'product-jpeg-500x500.webp'}
+                                            src={item.images?.[0] || item.image || 'product-jpeg-500x500.webp'}
                                             alt={item.name}
                                             className="w-12 h-12 object-cover rounded"
                                         />

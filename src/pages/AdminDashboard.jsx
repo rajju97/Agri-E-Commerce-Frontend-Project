@@ -211,7 +211,7 @@ const AdminDashboard = () => {
               <tbody>
                 {products.map(product => (
                   <tr key={product.id} className="hover">
-                    <td><img src={product.image || 'product-jpeg-500x500.webp'} alt={product.name} className="w-10 h-10 object-cover rounded" /></td>
+                    <td><img src={product.images?.[0] || product.image || 'product-jpeg-500x500.webp'} alt={product.name} className="w-10 h-10 object-cover rounded" /></td>
                     <td className="truncate max-w-xs">{product.name}</td>
                     <td>&#8377;{product.price}</td>
                     <td>{product.quantity}</td>

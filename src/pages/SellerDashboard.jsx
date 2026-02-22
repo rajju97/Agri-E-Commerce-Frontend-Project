@@ -1,7 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { storage } from '../firebase';
 import { useAuth } from '../context/AuthContext';
 import { getProducts, addProduct, deleteProduct, updateProduct, getOrdersBySeller } from '../services/db';
 import { generateProductDescription, generateProductImage } from '../services/ai';
@@ -17,13 +15,14 @@ const SellerDashboard = () => {
   const [editingId, setEditingId] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [imageUrlInput, setImageUrlInput] = useState('');
   const fileInputRef = useRef(null);
 
   const [formData, setFormData] = useState({
     name: '',
     description: '',
     price: '',
-    image: '',
+    images: [],
     quantity: 0,
     category: 'Other',
   });
@@ -76,7 +75,7 @@ const SellerDashboard = () => {
     setGenerating(true); setGenType('image');
     try {
       const imageUrl = await generateProductImage(`High quality, organic, fresh ${formData.name}`);
-      setFormData(prev => ({ ...prev, image: imageUrl }));
+      setFormData(prev => ({ ...prev, images: [...prev.images, imageUrl] }));
     } catch (error) {
       console.error(error);
       alert("Failed to generate image.");
@@ -85,33 +84,97 @@ const SellerDashboard = () => {
     }
   };
 
+  const compressImage = (file, maxWidth = 800, quality = 0.7) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL('image/jpeg', quality));
+        };
+        img.onerror = () => reject(new Error('Failed to load image'));
+        img.src = event.target.result;
+      };
+      reader.onerror = () => reject(new Error('Failed to read file'));
+      reader.readAsDataURL(file);
+    });
+  };
+
   const handleImageUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
 
     const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-    if (!allowedTypes.includes(file.type)) {
-      alert('Please select a valid image file (JPEG, PNG, WebP, or GIF).');
+    const maxSize = 5 * 1024 * 1024;
+    const maxImages = 5;
+
+    const remaining = maxImages - formData.images.length;
+    if (files.length > remaining) {
+      alert(`You can add up to ${maxImages} images. You have ${remaining} slot(s) remaining.`);
       return;
     }
-    if (file.size > 5 * 1024 * 1024) {
-      alert('Image size must be less than 5MB.');
-      return;
+
+    for (const file of files) {
+      if (!allowedTypes.includes(file.type)) {
+        alert(`"${file.name}" is not a valid image file. Allowed: JPEG, PNG, WebP, GIF.`);
+        return;
+      }
+      if (file.size > maxSize) {
+        alert(`"${file.name}" exceeds the 5MB size limit.`);
+        return;
+      }
     }
 
     setUploading(true);
     try {
-      const fileName = `products/${currentUser.uid}/${Date.now()}_${file.name}`;
-      const storageRef = ref(storage, fileName);
-      await uploadBytes(storageRef, file);
-      const downloadURL = await getDownloadURL(storageRef);
-      setFormData(prev => ({ ...prev, image: downloadURL }));
+      const compressedImages = [];
+      for (const file of files) {
+        const dataUrl = await compressImage(file);
+        compressedImages.push(dataUrl);
+      }
+      setFormData(prev => ({ ...prev, images: [...prev.images, ...compressedImages] }));
     } catch (error) {
-      console.error('Upload failed:', error);
-      alert('Failed to upload image. Please try again.');
+      console.error('Image processing failed:', error);
+      alert('Failed to process image. Please try again.');
     } finally {
       setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
     }
+  };
+
+  const handleAddImageUrl = () => {
+    const url = imageUrlInput.trim();
+    if (!url) return;
+    if (formData.images.length >= 5) {
+      alert('Maximum 5 images allowed.');
+      return;
+    }
+    try {
+      new URL(url);
+    } catch {
+      alert('Please enter a valid URL.');
+      return;
+    }
+    setFormData(prev => ({ ...prev, images: [...prev.images, url] }));
+    setImageUrlInput('');
+  };
+
+  const handleRemoveImage = (index) => {
+    setFormData(prev => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== index),
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -123,28 +186,30 @@ const SellerDashboard = () => {
 
     setSaving(true);
     try {
+      const productData = {
+        name: formData.name,
+        description: formData.description,
+        price: Number(formData.price),
+        quantity: Number(formData.quantity),
+        images: formData.images,
+        image: formData.images[0] || '',
+        category: formData.category,
+      };
+
       if (editingId) {
-        await updateProduct(editingId, {
-          name: formData.name,
-          description: formData.description,
-          price: Number(formData.price),
-          quantity: Number(formData.quantity),
-          image: formData.image,
-          category: formData.category,
-        });
+        await updateProduct(editingId, productData);
         alert("Product updated!");
         setEditingId(null);
       } else {
         await addProduct({
-          ...formData,
-          price: Number(formData.price),
-          quantity: Number(formData.quantity),
+          ...productData,
           sellerId: currentUser.uid,
           sellerEmail: currentUser.email,
         });
         alert("Product added!");
       }
-      setFormData({ name: '', description: '', price: '', image: '', quantity: 0, category: 'Other' });
+      setFormData({ name: '', description: '', price: '', images: [], quantity: 0, category: 'Other' });
+      setImageUrlInput('');
       if (fileInputRef.current) fileInputRef.current.value = '';
       loadData();
     } catch (error) {
@@ -157,20 +222,25 @@ const SellerDashboard = () => {
 
   const handleEdit = (product) => {
     setEditingId(product.id);
+    const images = product.images && product.images.length > 0
+      ? product.images
+      : product.image ? [product.image] : [];
     setFormData({
       name: product.name || '',
       description: product.description || '',
       price: product.price || '',
-      image: product.image || '',
+      images,
       quantity: product.quantity || 0,
       category: product.category || 'Other',
     });
+    setImageUrlInput('');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleCancelEdit = () => {
     setEditingId(null);
-    setFormData({ name: '', description: '', price: '', image: '', quantity: 0, category: 'Other' });
+    setFormData({ name: '', description: '', price: '', images: [], quantity: 0, category: 'Other' });
+    setImageUrlInput('');
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
@@ -273,13 +343,13 @@ const SellerDashboard = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">Product Image</label>
+              <label className="block text-sm font-medium mb-1">Product Images <span className="text-xs text-gray-400 font-normal">({formData.images.length}/5)</span></label>
               <div className="flex flex-wrap gap-2 mb-2">
                 <button type="button" onClick={() => fileInputRef.current?.click()}
-                  disabled={uploading}
+                  disabled={uploading || formData.images.length >= 5}
                   className="btn btn-sm btn-outline btn-primary">
                   <i className="fas fa-upload mr-1"></i>
-                  {uploading ? 'Uploading...' : 'Upload Image'}
+                  {uploading ? 'Processing...' : 'Upload Images'}
                 </button>
                 <input
                   ref={fileInputRef}
@@ -287,14 +357,41 @@ const SellerDashboard = () => {
                   accept="image/jpeg,image/png,image/webp,image/gif"
                   onChange={handleImageUpload}
                   className="hidden"
+                  multiple
                 />
               </div>
-              <input type="text" name="image" value={formData.image}
-                onChange={handleInputChange} className="input input-bordered w-full"
-                placeholder="Or paste image URL here..." />
-              {formData.image && (
-                <img src={formData.image} alt="Preview"
-                  className="mt-2 h-32 w-32 object-cover rounded border" />
+              <div className="flex gap-2 mb-2">
+                <input type="text" value={imageUrlInput}
+                  onChange={(e) => setImageUrlInput(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddImageUrl(); } }}
+                  className="input input-bordered input-sm flex-1"
+                  placeholder="Or paste image URL here..." />
+                <button type="button" onClick={handleAddImageUrl}
+                  className="btn btn-sm btn-outline btn-primary">Add</button>
+              </div>
+
+              {/* Image Previews */}
+              {formData.images.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {formData.images.map((url, index) => (
+                    <div key={index} className="relative group">
+                      <img src={url} alt={`Image ${index + 1}`}
+                        className="h-24 w-24 object-cover rounded border" />
+                      <button type="button" onClick={() => handleRemoveImage(index)}
+                        className="absolute -top-2 -right-2 btn btn-circle btn-xs btn-error text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                        <i className="fas fa-times text-xs"></i>
+                      </button>
+                      {index === 0 && (
+                        <span className="absolute bottom-0 left-0 right-0 bg-primary text-white text-[10px] text-center py-0.5 rounded-b">
+                          Cover
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+              {formData.images.length === 0 && (
+                <p className="text-xs text-gray-400 mt-1">No images added. Upload files or paste URLs.</p>
               )}
             </div>
 
@@ -318,32 +415,41 @@ const SellerDashboard = () => {
           {loading ? <p>Loading...</p> : (
             products.length === 0 ? <p className="text-gray-500">No products added yet.</p> : (
               <div className="space-y-4 max-h-[800px] overflow-y-auto pr-2">
-                {products.map(product => (
-                  <div key={product.id} className="flex flex-col sm:flex-row items-center justify-between p-4 border rounded shadow-sm hover:bg-gray-50 gap-4">
-                    <div className="flex items-center gap-4 w-full">
-                      <img src={product.image || 'product-jpeg-500x500.webp'} alt={product.name}
-                        className="w-16 h-16 object-cover rounded" />
-                      <div className="flex-1">
-                        <h3 className="font-semibold">{product.name}</h3>
-                        <p className="text-sm text-gray-500 line-clamp-1">{product.description}</p>
-                        <p className="text-sm font-bold mt-1">&#8377;{product.price} | Qty: {product.quantity}</p>
-                        {product.category && (
-                          <span className="badge badge-sm badge-ghost">{product.category}</span>
-                        )}
+                {products.map(product => {
+                  const displayImage = product.images?.[0] || product.image || 'product-jpeg-500x500.webp';
+                  const imageCount = product.images?.length || (product.image ? 1 : 0);
+                  return (
+                    <div key={product.id} className="flex flex-col sm:flex-row items-center justify-between p-4 border rounded shadow-sm hover:bg-gray-50 gap-4">
+                      <div className="flex items-center gap-4 w-full">
+                        <div className="relative">
+                          <img src={displayImage} alt={product.name}
+                            className="w-16 h-16 object-cover rounded" />
+                          {imageCount > 1 && (
+                            <span className="absolute -top-1 -right-1 badge badge-xs badge-primary">{imageCount}</span>
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="font-semibold">{product.name}</h3>
+                          <p className="text-sm text-gray-500 line-clamp-1">{product.description}</p>
+                          <p className="text-sm font-bold mt-1">&#8377;{product.price} | Qty: {product.quantity}</p>
+                          {product.category && (
+                            <span className="badge badge-sm badge-ghost">{product.category}</span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <button onClick={() => handleEdit(product)}
+                          className="btn btn-sm btn-primary whitespace-nowrap">
+                          <i className="fas fa-edit"></i>
+                        </button>
+                        <button onClick={() => handleDelete(product.id)}
+                          className="btn btn-sm btn-error text-white whitespace-nowrap">
+                          <i className="fas fa-trash"></i>
+                        </button>
                       </div>
                     </div>
-                    <div className="flex gap-2">
-                      <button onClick={() => handleEdit(product)}
-                        className="btn btn-sm btn-primary whitespace-nowrap">
-                        <i className="fas fa-edit"></i>
-                      </button>
-                      <button onClick={() => handleDelete(product.id)}
-                        className="btn btn-sm btn-error text-white whitespace-nowrap">
-                        <i className="fas fa-trash"></i>
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )
           )}
