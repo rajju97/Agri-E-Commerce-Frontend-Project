@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getProducts, addProduct, deleteProduct, updateProduct, getOrdersBySeller } from '../services/db';
 import { generateProductDescription, generateProductImage } from '../services/ai';
+import Notification from '../components/Notification';
+import ConfirmationModal from '../components/ConfirmationModal';
 
 const SellerDashboard = () => {
   const { currentUser } = useAuth();
@@ -17,6 +19,8 @@ const SellerDashboard = () => {
   const [saving, setSaving] = useState(false);
   const [imageUrlInput, setImageUrlInput] = useState('');
   const fileInputRef = useRef(null);
+  const [notification, setNotification] = useState({ message: '', type: '' });
+  const [modalData, setModalData] = useState({ title: '', message: '', onConfirm: null, id: '' });
 
   const [formData, setFormData] = useState({
     name: '',
@@ -46,6 +50,7 @@ const SellerDashboard = () => {
       setOrders(ordersData);
     } catch (error) {
       console.error("Error loading data:", error);
+      setNotification({ message: 'Failed to load data.', type: 'error' });
     } finally {
       setLoading(false);
     }
@@ -57,28 +62,30 @@ const SellerDashboard = () => {
   };
 
   const handleGenerateDesc = async () => {
-    if (!formData.name) return alert("Please enter a product name first.");
+    if (!formData.name) return setNotification({ message: 'Please enter a product name first.', type: 'warning' });
     setGenerating(true); setGenType('desc');
     try {
       const desc = await generateProductDescription(`Write a short, engaging product description for: ${formData.name}. Keep it under 100 words.`);
       setFormData(prev => ({ ...prev, description: desc }));
+      setNotification({ message: 'AI description generated!', type: 'success' });
     } catch (error) {
       console.error(error);
-      alert("Failed to generate description.");
+      setNotification({ message: 'Failed to generate description.', type: 'error' });
     } finally {
       setGenerating(false); setGenType(null);
     }
   };
 
   const handleGenerateImage = async () => {
-    if (!formData.name) return alert("Please enter a product name first.");
+    if (!formData.name) return setNotification({ message: 'Please enter a product name first.', type: 'warning' });
     setGenerating(true); setGenType('image');
     try {
       const imageUrl = await generateProductImage(`High quality, organic, fresh ${formData.name}`);
       setFormData(prev => ({ ...prev, images: [...prev.images, imageUrl] }));
+      setNotification({ message: 'AI image generated!', type: 'success' });
     } catch (error) {
       console.error(error);
-      alert("Failed to generate image.");
+      setNotification({ message: 'Failed to generate image.', type: 'error' });
     } finally {
       setGenerating(false); setGenType(null);
     }
@@ -121,17 +128,17 @@ const SellerDashboard = () => {
 
     const remaining = maxImages - formData.images.length;
     if (files.length > remaining) {
-      alert(`You can add up to ${maxImages} images. You have ${remaining} slot(s) remaining.`);
+      setNotification({ message: `You can add up to ${maxImages} images. You have ${remaining} slot(s) remaining.`, type: 'warning' });
       return;
     }
 
     for (const file of files) {
       if (!allowedTypes.includes(file.type)) {
-        alert(`"${file.name}" is not a valid image file. Allowed: JPEG, PNG, WebP, GIF.`);
+        setNotification({ message: `"${file.name}" is not a valid image file.`, type: 'error' });
         return;
       }
       if (file.size > maxSize) {
-        alert(`"${file.name}" exceeds the 5MB size limit.`);
+        setNotification({ message: `"${file.name}" exceeds the 5MB size limit.`, type: 'error' });
         return;
       }
     }
@@ -146,7 +153,7 @@ const SellerDashboard = () => {
       setFormData(prev => ({ ...prev, images: [...prev.images, ...compressedImages] }));
     } catch (error) {
       console.error('Image processing failed:', error);
-      alert('Failed to process image. Please try again.');
+      setNotification({ message: 'Failed to process image. Please try again.', type: 'error' });
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -157,13 +164,13 @@ const SellerDashboard = () => {
     const url = imageUrlInput.trim();
     if (!url) return;
     if (formData.images.length >= 5) {
-      alert('Maximum 5 images allowed.');
+      setNotification({ message: 'Maximum 5 images allowed.', type: 'warning' });
       return;
     }
     try {
       new URL(url);
     } catch {
-      alert('Please enter a valid URL.');
+      setNotification({ message: 'Please enter a valid URL.', type: 'error' });
       return;
     }
     setFormData(prev => ({ ...prev, images: [...prev.images, url] }));
@@ -180,7 +187,7 @@ const SellerDashboard = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!currentUser) {
-      alert("You must be logged in to add products. Please log in again.");
+        setNotification({ message: 'You must be logged in to add products. Please log in again.', type: 'error' });
       return;
     }
 
@@ -198,7 +205,7 @@ const SellerDashboard = () => {
 
       if (editingId) {
         await updateProduct(editingId, productData);
-        alert("Product updated!");
+        setNotification({ message: 'Product updated successfully!', type: 'success' });
         setEditingId(null);
       } else {
         await addProduct({
@@ -206,7 +213,7 @@ const SellerDashboard = () => {
           sellerId: currentUser.uid,
           sellerEmail: currentUser.email,
         });
-        alert("Product added!");
+        setNotification({ message: 'Product added successfully!', type: 'success' });
       }
       setFormData({ name: '', description: '', price: '', images: [], quantity: 0, category: 'Other' });
       setImageUrlInput('');
@@ -214,7 +221,7 @@ const SellerDashboard = () => {
       loadData();
     } catch (error) {
       console.error("Failed to save product:", error);
-      alert("Failed to save product. " + (error.message || ''));
+      setNotification({ message: `Failed to save product: ${error.message}` , type: 'error' });
     } finally {
       setSaving(false);
     }
@@ -244,17 +251,26 @@ const SellerDashboard = () => {
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
-  const handleDelete = async (id) => {
-    if (confirm("Are you sure you want to delete this product?")) {
-      try {
-        await deleteProduct(id);
-        loadData();
-      } catch (error) {
-        console.error(error);
-        alert("Failed to delete product.");
-      }
-    }
+  const handleDelete = (id) => {
+    setModalData({
+        title: 'Delete Product',
+        message: 'Are you sure you want to delete this product? This action cannot be undone.',
+        onConfirm: () => confirmDelete(id),
+        id: 'product-delete-modal'
+    });
+    document.getElementById('product-delete-modal').showModal();
   };
+
+  const confirmDelete = async (id) => {
+    try {
+      await deleteProduct(id);
+      setNotification({ message: 'Product deleted.', type: 'success' });
+      loadData();
+    } catch (error) {
+      console.error(error);
+      setNotification({ message: 'Failed to delete product.', type: 'error' });
+    }
+  }
 
   // Stats
   const totalRevenue = orders.filter(o => o.status === 'delivered').reduce((sum, o) => sum + (o.total || 0), 0);
@@ -262,6 +278,9 @@ const SellerDashboard = () => {
 
   return (
     <div className="container mx-auto p-4">
+        <Notification message={notification.message} type={notification.type} />
+        <ConfirmationModal {...modalData} />
+
       <div className="flex flex-wrap justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Seller Dashboard</h1>
         <button onClick={() => navigate('/seller-orders')} className="btn btn-primary btn-sm">
@@ -272,27 +291,27 @@ const SellerDashboard = () => {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white p-4 rounded-lg shadow text-center">
+        <div className="bg-base-100 p-4 rounded-lg shadow text-center">
           <p className="text-2xl font-bold text-primary">{products.length}</p>
-          <p className="text-sm text-gray-500">Products</p>
+          <p className="text-sm text-base-content/60">Products</p>
         </div>
-        <div className="bg-white p-4 rounded-lg shadow text-center">
+        <div className="bg-base-100 p-4 rounded-lg shadow text-center">
           <p className="text-2xl font-bold text-blue-600">{orders.length}</p>
-          <p className="text-sm text-gray-500">Total Orders</p>
+          <p className="text-sm text-base-content/60">Total Orders</p>
         </div>
-        <div className="bg-white p-4 rounded-lg shadow text-center">
+        <div className="bg-base-100 p-4 rounded-lg shadow text-center">
           <p className="text-2xl font-bold text-yellow-600">{pendingOrders}</p>
-          <p className="text-sm text-gray-500">Pending</p>
+          <p className="text-sm text-base-content/60">Pending</p>
         </div>
-        <div className="bg-white p-4 rounded-lg shadow text-center">
+        <div className="bg-base-100 p-4 rounded-lg shadow text-center">
           <p className="text-2xl font-bold text-green-600">&#8377;{totalRevenue.toFixed(0)}</p>
-          <p className="text-sm text-gray-500">Revenue</p>
+          <p className="text-sm text-base-content/60">Revenue</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Add/Edit Product Form */}
-        <div className="bg-white p-6 rounded shadow-md h-fit">
+        <div className="bg-base-100 p-6 rounded shadow-md h-fit">
           <h2 className="text-xl font-semibold mb-4">
             {editingId ? 'Edit Product' : 'Add New Product'}
           </h2>
@@ -343,7 +362,7 @@ const SellerDashboard = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">Product Images <span className="text-xs text-gray-400 font-normal">({formData.images.length}/5)</span></label>
+              <label className="block text-sm font-medium mb-1">Product Images <span className="text-xs text-base-content/60 font-normal">({formData.images.length}/5)</span></label>
               <div className="flex flex-wrap gap-2 mb-2">
                 <button type="button" onClick={() => fileInputRef.current?.click()}
                   disabled={uploading || formData.images.length >= 5}
@@ -391,7 +410,7 @@ const SellerDashboard = () => {
                 </div>
               )}
               {formData.images.length === 0 && (
-                <p className="text-xs text-gray-400 mt-1">No images added. Upload files or paste URLs.</p>
+                <p className="text-xs text-base-content/60 mt-1">No images added. Upload files or paste URLs.</p>
               )}
             </div>
 
@@ -410,16 +429,16 @@ const SellerDashboard = () => {
         </div>
 
         {/* Product List */}
-        <div className="bg-white p-6 rounded shadow-md h-fit">
+        <div className="bg-base-100 p-6 rounded shadow-md h-fit">
           <h2 className="text-xl font-semibold mb-4">Your Products ({products.length})</h2>
-          {loading ? <p>Loading...</p> : (
-            products.length === 0 ? <p className="text-gray-500">No products added yet.</p> : (
+          {loading ? <div className="flex justify-center items-center"><span className="loading loading-spinner loading-lg"></span></div> : (
+            products.length === 0 ? <p className="text-base-content/60">No products added yet.</p> : (
               <div className="space-y-4 max-h-[800px] overflow-y-auto pr-2">
                 {products.map(product => {
                   const displayImage = product.images?.[0] || product.image || 'product-jpeg-500x500.webp';
                   const imageCount = product.images?.length || (product.image ? 1 : 0);
                   return (
-                    <div key={product.id} className="flex flex-col sm:flex-row items-center justify-between p-4 border rounded shadow-sm hover:bg-gray-50 gap-4">
+                    <div key={product.id} className="flex flex-col sm:flex-row items-center justify-between p-4 border border-base-200 rounded shadow-sm hover:bg-base-200 gap-4">
                       <div className="flex items-center gap-4 w-full">
                         <div className="relative">
                           <img src={displayImage} alt={product.name}
@@ -430,7 +449,7 @@ const SellerDashboard = () => {
                         </div>
                         <div className="flex-1">
                           <h3 className="font-semibold">{product.name}</h3>
-                          <p className="text-sm text-gray-500 line-clamp-1">{product.description}</p>
+                          <p className="text-sm text-base-content/60 line-clamp-1">{product.description}</p>
                           <p className="text-sm font-bold mt-1">&#8377;{product.price} | Qty: {product.quantity}</p>
                           {product.category && (
                             <span className="badge badge-sm badge-ghost">{product.category}</span>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { getOrdersBySeller, updateOrderStatus } from '../services/db';
+import Notification from '../components/Notification';
 
 const statusColors = {
     pending: 'badge-warning',
@@ -17,6 +18,7 @@ const SellerOrders = () => {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('all');
+    const [notification, setNotification] = useState({ message: '', type: '' });
 
     useEffect(() => {
         loadOrders();
@@ -35,6 +37,7 @@ const SellerOrders = () => {
             setOrders(data);
         } catch (error) {
             console.error("Error loading seller orders:", error);
+            setNotification({ message: 'Failed to load orders.', type: 'error' });
         } finally {
             setLoading(false);
         }
@@ -43,10 +46,11 @@ const SellerOrders = () => {
     const handleStatusUpdate = async (orderId, newStatus) => {
         try {
             await updateOrderStatus(orderId, newStatus);
+            setNotification({ message: `Order status updated to ${newStatus}.`, type: 'success' });
             await loadOrders();
         } catch (error) {
             console.error("Error updating order status:", error);
-            alert("Failed to update order status.");
+            setNotification({ message: 'Failed to update order status.', type: 'error' });
         }
     };
 
@@ -64,6 +68,7 @@ const SellerOrders = () => {
 
     return (
         <div className="container mx-auto p-4 max-w-5xl">
+            <Notification message={notification.message} type={notification.type} />
             <h1 className="text-3xl font-bold mb-6">Manage Orders</h1>
 
             {/* Filter Tabs */}
@@ -84,39 +89,39 @@ const SellerOrders = () => {
 
             {/* Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                <div className="bg-yellow-50 p-4 rounded-lg text-center">
+                <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg text-center">
                     <p className="text-2xl font-bold text-yellow-600">{orders.filter(o => o.status === 'pending').length}</p>
-                    <p className="text-sm text-gray-600">Pending</p>
+                    <p className="text-sm text-base-content/60">Pending</p>
                 </div>
-                <div className="bg-blue-50 p-4 rounded-lg text-center">
+                <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg text-center">
                     <p className="text-2xl font-bold text-blue-600">{orders.filter(o => o.status === 'confirmed').length}</p>
-                    <p className="text-sm text-gray-600">Confirmed</p>
+                    <p className="text-sm text-base-content/60">Confirmed</p>
                 </div>
-                <div className="bg-purple-50 p-4 rounded-lg text-center">
+                <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg text-center">
                     <p className="text-2xl font-bold text-purple-600">{orders.filter(o => o.status === 'shipped').length}</p>
-                    <p className="text-sm text-gray-600">Shipped</p>
+                    <p className="text-sm text-base-content/60">Shipped</p>
                 </div>
-                <div className="bg-green-50 p-4 rounded-lg text-center">
+                <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg text-center">
                     <p className="text-2xl font-bold text-green-600">{orders.filter(o => o.status === 'delivered').length}</p>
-                    <p className="text-sm text-gray-600">Delivered</p>
+                    <p className="text-sm text-base-content/60">Delivered</p>
                 </div>
             </div>
 
             {filteredOrders.length === 0 ? (
-                <div className="bg-white rounded-lg shadow-md p-10 text-center">
-                    <p className="text-gray-500">No orders found.</p>
+                <div className="bg-base-100 rounded-lg shadow-md p-10 text-center">
+                    <p className="text-base-content/60">No orders found.</p>
                 </div>
             ) : (
                 <div className="space-y-4">
                     {filteredOrders.map((order) => {
                         const nextStatus = getNextStatus(order.status);
                         return (
-                            <div key={order.id} className="bg-white rounded-lg shadow-md p-6">
+                            <div key={order.id} className="bg-base-100 rounded-lg shadow-md p-6">
                                 <div className="flex flex-wrap justify-between items-start mb-4">
                                     <div>
                                         <p className="font-semibold">Order #{order.id.slice(-8).toUpperCase()}</p>
-                                        <p className="text-sm text-gray-500">Buyer: {order.buyerEmail}</p>
-                                        <p className="text-xs text-gray-400">
+                                        <p className="text-sm text-base-content/60">Buyer: {order.buyerEmail}</p>
+                                        <p className="text-xs text-base-content/40">
                                             {order.createdAt?.seconds
                                                 ? new Date(order.createdAt.seconds * 1000).toLocaleDateString('en-IN', {
                                                     day: 'numeric', month: 'long', year: 'numeric'
@@ -142,23 +147,23 @@ const SellerOrders = () => {
 
                                 {/* Shipping Info */}
                                 {order.shippingAddress && (
-                                    <div className="text-sm text-gray-500 mb-4 p-3 bg-gray-50 rounded">
-                                        <p className="font-medium text-gray-700">Ship to:</p>
+                                    <div className="text-sm text-base-content/60 mb-4 p-3 bg-base-200 rounded">
+                                        <p className="font-medium text-base-content">Ship to:</p>
                                         <p>{order.shippingAddress.fullName}, {order.shippingAddress.phone}</p>
                                         <p>{order.shippingAddress.address}</p>
                                         <p>{order.shippingAddress.city}, {order.shippingAddress.state} - {order.shippingAddress.pincode}</p>
                                     </div>
                                 )}
 
-                                <div className="text-sm text-gray-500 mb-4 p-3 bg-gray-50 rounded">
-                                    <p className="font-medium text-gray-700 flex items-center gap-2">
+                                <div className="text-sm text-base-content/60 mb-4 p-3 bg-base-200 rounded">
+                                    <p className="font-medium text-base-content flex items-center gap-2">
                                         Payment: {order.paymentMethod === 'online' ? 'Online' : 'Cash on Delivery'}
                                         {order.paymentStatus === 'paid' && (
                                             <span className="badge badge-success badge-sm text-white">Paid</span>
                                         )}
                                     </p>
                                     {order.paymentId && (
-                                        <p className="text-xs text-gray-400 mt-1">Txn: {order.paymentId}</p>
+                                        <p className="text-xs text-base-content/40 mt-1">Txn: {order.paymentId}</p>
                                     )}
                                 </div>
 

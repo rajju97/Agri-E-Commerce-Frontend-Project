@@ -15,6 +15,17 @@ export default {
         success: '#36D399',
         warning: '#FBBD23',
         error: '#F87272',
+      },
+      dark: {
+        primary: '#4CAF50',
+        secondary: '#1e3778',
+        accent: '#1e3778',
+        neutral: '#3D4451',
+        'base-100': '#1d232a',
+        info: '#3ABFF8',
+        success: '#36D399',
+        warning: '#FBBD23',
+        error: '#F87272',
       }
     }],
   },

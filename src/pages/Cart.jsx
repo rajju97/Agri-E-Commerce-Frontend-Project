@@ -2,6 +2,9 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { addItem, removeItem, clearCart } from '../dispatchers';
 import { useAuth } from '../context/AuthContext';
+import { useState } from 'react';
+import Notification from '../components/Notification';
+import ConfirmationModal from '../components/ConfirmationModal';
 
 const Cart = () => {
     const cartItems = useSelector((state) => state.cart.items);
@@ -9,6 +12,7 @@ const Cart = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { currentUser } = useAuth();
+    const [notification, setNotification] = useState({ message: '', type: '' });
 
     const totalPrice = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
@@ -21,15 +25,18 @@ const Cart = () => {
     };
 
     const handleClearCart = () => {
-        if (confirm("Clear all items from cart?")) {
-            dispatch(clearCart());
-        }
+        document.getElementById('clear-cart-modal').showModal();
+    };
+
+    const confirmClearCart = () => {
+        dispatch(clearCart());
+        setNotification({ message: 'Cart cleared successfully.', type: 'success' });
     };
 
     const handleCheckout = () => {
         if (!currentUser) {
-            alert("Please login to proceed to checkout.");
-            navigate('/login');
+            setNotification({ message: 'Please login to proceed to checkout.', type: 'error' });
+            setTimeout(() => navigate('/login'), 2000);
             return;
         }
         navigate('/checkout');
@@ -38,8 +45,9 @@ const Cart = () => {
     if (cartItems.length === 0) {
         return (
             <div className="container mx-auto p-4 max-w-4xl">
+                 <Notification message={notification.message} type={notification.type} />
                 <h1 className="text-3xl font-bold mb-6">Shopping Cart</h1>
-                <div className="bg-white rounded-lg shadow-md p-10 text-center">
+                <div className="bg-base-100 rounded-lg shadow-md p-10 text-center">
                     <i className="fas fa-shopping-cart text-6xl text-gray-300 mb-4"></i>
                     <h2 className="text-xl text-gray-500 mb-4">Your cart is empty</h2>
                     <button onClick={() => navigate('/products')} className="btn btn-primary">
@@ -52,13 +60,15 @@ const Cart = () => {
 
     return (
         <div className="container mx-auto p-4 max-w-4xl">
+            <Notification message={notification.message} type={notification.type} />
+            <ConfirmationModal id="clear-cart-modal" title="Clear Cart" message="Are you sure you want to clear all items from your cart?" onConfirm={confirmClearCart} />
             <h1 className="text-3xl font-bold mb-6">Shopping Cart ({itemCount} items)</h1>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Cart Items */}
                 <div className="lg:col-span-2 space-y-4">
                     {cartItems.map((item) => (
-                        <div key={item.id} className="bg-white rounded-lg shadow-md p-4 flex flex-col sm:flex-row gap-4">
+                        <div key={item.id} className="bg-base-100 rounded-lg shadow-md p-4 flex flex-col sm:flex-row gap-4">
                             <img
                                 src={item.images?.[0] || item.image || "product-jpeg-500x500.webp"}
                                 alt={item.name}
@@ -96,7 +106,7 @@ const Cart = () => {
                 </div>
 
                 {/* Order Summary */}
-                <div className="bg-white rounded-lg shadow-md p-6 h-fit sticky top-4">
+                <div className="bg-base-100 rounded-lg shadow-md p-6 h-fit sticky top-4">
                     <h2 className="text-xl font-bold mb-4">Order Summary</h2>
 
                     <div className="space-y-2 mb-4">

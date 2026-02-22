@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useSelector } from 'react-redux';
 import { useNavigate, NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import ThemeSwitcher from './ThemeSwitcher';
 
 const NavBar = () => {
     const navigate = useNavigate();
@@ -52,6 +53,8 @@ const NavBar = () => {
                     <NavLink to="/about-us" className={navLinkClass}>About</NavLink>
                     <NavLink to="/contact" className={navLinkClass}>Contact</NavLink>
 
+                    <ThemeSwitcher />
+
                     {!currentUser ? (
                         <>
                             <NavLink to="/login" className={navLinkClass}>Login</NavLink>
@@ -65,7 +68,7 @@ const NavBar = () => {
                                 </div>
                                 <i className="fas fa-chevron-down text-xs"></i>
                             </label>
-                            <ul tabIndex={0} className="dropdown-content z-50 menu p-2 shadow-lg bg-white rounded-box w-52 text-soil mt-2">
+                            <ul tabIndex={0} className="dropdown-content z-50 menu p-2 shadow-lg bg-base-100 rounded-box w-52 text-base-content mt-2">
                                 <li className="menu-title"><span className="text-xs truncate">{currentUser.email}</span></li>
                                 <li><a onClick={() => navigate('/profile')}><i className="fas fa-user mr-2"></i>My Profile</a></li>
                                 <li><a onClick={() => navigate('/orders')}><i className="fas fa-box mr-2"></i>My Orders</a></li>
@@ -91,6 +94,7 @@ const NavBar = () => {
 
                 {/* Mobile: Cart + Hamburger */}
                 <div className="lg:hidden flex items-center gap-3">
+                    <ThemeSwitcher />
                     <div className="relative">
                         <NavLink to="/cart" className="text-white" onClick={closeMobile}>
                             <i className="fas fa-shopping-cart text-lg"></i>

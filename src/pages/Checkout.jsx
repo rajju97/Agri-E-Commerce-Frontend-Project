@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { createOrder } from '../services/db';
 import { clearCart } from '../dispatchers';
+import Notification from '../components/Notification';
 
 const RAZORPAY_KEY = import.meta.env.VITE_RAZORPAY_KEY_ID;
 
@@ -64,6 +65,7 @@ const Checkout = () => {
     const [placing, setPlacing] = useState(false);
     const [orderPlaced, setOrderPlaced] = useState(false);
     const [orderId, setOrderId] = useState('');
+    const [notification, setNotification] = useState({ message: '', type: '' });
 
     const totalPrice = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
@@ -84,7 +86,7 @@ const Checkout = () => {
             // Handle online payment via Razorpay
             if (formData.paymentMethod === 'online') {
                 if (!RAZORPAY_KEY) {
-                    alert('Payment gateway is not configured. Please contact support.');
+                    setNotification({ message: 'Payment gateway is not configured. Please contact support.', type: 'error' });
                     setPlacing(false);
                     return;
                 }
@@ -99,7 +101,7 @@ const Checkout = () => {
                     paymentId = paymentResponse.razorpay_payment_id;
                     paymentStatus = 'paid';
                 } catch (paymentError) {
-                    alert(paymentError.message);
+                    setNotification({ message: paymentError.message, type: 'error' });
                     setPlacing(false);
                     return;
                 }
@@ -151,7 +153,7 @@ const Checkout = () => {
             dispatch(clearCart());
         } catch (error) {
             console.error("Error placing order:", error);
-            alert("Failed to place order. Please try again.");
+            setNotification({ message: 'Failed to place order. Please try again.', type: 'error' });
         } finally {
             setPlacing(false);
         }
@@ -165,7 +167,7 @@ const Checkout = () => {
     if (orderPlaced) {
         return (
             <div className="container mx-auto p-4 max-w-2xl">
-                <div className="bg-white rounded-lg shadow-md p-10 text-center">
+                <div className="bg-base-100 rounded-lg shadow-md p-10 text-center">
                     <div className="text-green-500 text-6xl mb-4">
                         <i className="fas fa-check-circle"></i>
                     </div>
@@ -187,12 +189,13 @@ const Checkout = () => {
 
     return (
         <div className="container mx-auto p-4 max-w-5xl">
+            <Notification message={notification.message} type={notification.type} />
             <h1 className="text-3xl font-bold mb-6">Checkout</h1>
 
             <form onSubmit={handlePlaceOrder}>
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Shipping Form */}
-                    <div className="lg:col-span-2 bg-white rounded-lg shadow-md p-6">
+                    <div className="lg:col-span-2 bg-base-100 rounded-lg shadow-md p-6">
                         <h2 className="text-xl font-bold mb-4">Shipping Address</h2>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -272,7 +275,7 @@ const Checkout = () => {
                     </div>
 
                     {/* Order Summary Sidebar */}
-                    <div className="bg-white rounded-lg shadow-md p-6 h-fit sticky top-4">
+                    <div className="bg-base-100 rounded-lg shadow-md p-6 h-fit sticky top-4">
                         <h2 className="text-xl font-bold mb-4">Order Summary</h2>
 
                         <div className="space-y-3 mb-4 max-h-60 overflow-y-auto">

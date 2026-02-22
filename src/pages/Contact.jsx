@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import Notification from '../components/Notification';
 
 const Contact = () => {
     const [formData, setFormData] = useState({
@@ -7,7 +8,7 @@ const Contact = () => {
         subject: '',
         message: '',
     });
-    const [submitted, setSubmitted] = useState(false);
+    const [notification, setNotification] = useState({ message: '', type: '' });
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -18,9 +19,8 @@ const Contact = () => {
         e.preventDefault();
         // In production, this would send to a backend/Firebase
         console.log("Contact form submitted:", formData);
-        setSubmitted(true);
+        setNotification({ message: 'Thank you! Your message has been sent successfully.', type: 'success' });
         setFormData({ name: '', email: '', subject: '', message: '' });
-        setTimeout(() => setSubmitted(false), 5000);
     };
 
     return (
@@ -46,7 +46,7 @@ const Contact = () => {
                                 </div>
                                 <div>
                                     <h3 className="font-semibold">Address</h3>
-                                    <p className="text-gray-600">Ganga Agri Innovation Foundation, New Delhi, India</p>
+                                    <p className="text-base-content/80">Ganga Agri Innovation Foundation, New Delhi, India</p>
                                 </div>
                             </div>
 
@@ -56,7 +56,7 @@ const Contact = () => {
                                 </div>
                                 <div>
                                     <h3 className="font-semibold">Phone</h3>
-                                    <p className="text-gray-600">+91 XXXXX XXXXX</p>
+                                    <p className="text-base-content/80">+91 XXXXX XXXXX</p>
                                 </div>
                             </div>
 
@@ -66,7 +66,7 @@ const Contact = () => {
                                 </div>
                                 <div>
                                     <h3 className="font-semibold">Email</h3>
-                                    <p className="text-gray-600">info@gaif.org</p>
+                                    <p className="text-base-content/80">info@gaif.org</p>
                                 </div>
                             </div>
 
@@ -76,7 +76,7 @@ const Contact = () => {
                                 </div>
                                 <div>
                                     <h3 className="font-semibold">Working Hours</h3>
-                                    <p className="text-gray-600">Mon - Sat: 9:00 AM - 6:00 PM</p>
+                                    <p className="text-base-content/80">Mon - Sat: 9:00 AM - 6:00 PM</p>
                                 </div>
                             </div>
                         </div>
@@ -89,7 +89,7 @@ const Contact = () => {
                                     <a
                                         key={social}
                                         href="#"
-                                        className="bg-gray-200 p-3 rounded-full hover:bg-primary hover:text-white transition-colors"
+                                        className="bg-base-200 p-3 rounded-full hover:bg-primary hover:text-white transition-colors"
                                     >
                                         <i className={`fab fa-${social}`}></i>
                                     </a>
@@ -99,15 +99,10 @@ const Contact = () => {
                     </div>
 
                     {/* Contact Form */}
-                    <div className="bg-white p-8 rounded-lg shadow-md">
+                    <div className="bg-base-100 p-8 rounded-lg shadow-md">
                         <h2 className="text-2xl font-bold mb-6">Send a Message</h2>
 
-                        {submitted && (
-                            <div className="alert alert-success mb-4">
-                                <i className="fas fa-check-circle"></i>
-                                <span>Thank you! Your message has been sent successfully.</span>
-                            </div>
-                        )}
+                        <Notification message={notification.message} type={notification.type} />
 
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div>
