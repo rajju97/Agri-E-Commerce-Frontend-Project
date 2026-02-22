@@ -133,7 +133,7 @@ const SellerOrders = () => {
                                 <div className="space-y-2 mb-4">
                                     {order.items?.map((item, idx) => (
                                         <div key={idx} className="flex items-center gap-3 text-sm">
-                                            <img src={item.image || 'product-jpeg-500x500.webp'} alt={item.name} className="w-10 h-10 object-cover rounded" />
+                                            <img src={item.images?.[0] || item.image || 'product-jpeg-500x500.webp'} alt={item.name} className="w-10 h-10 object-cover rounded" />
                                             <span className="flex-1">{item.name} x{item.quantity}</span>
                                             <span className="font-semibold">&#8377;{(item.price * item.quantity).toFixed(2)}</span>
                                         </div>

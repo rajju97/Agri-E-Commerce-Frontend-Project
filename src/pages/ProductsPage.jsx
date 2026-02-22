@@ -123,7 +123,7 @@ const ProductsPage = () => {
                             className="bg-white rounded-lg shadow-md overflow-hidden transform transition-transform duration-300 hover:scale-105 hover:shadow-lg flex flex-col"
                         >
                             <img
-                                src={product.image || "product-jpeg-500x500.webp"}
+                                src={product.images?.[0] || product.image || "product-jpeg-500x500.webp"}
                                 alt={product.name}
                                 className="w-full h-48 object-cover cursor-pointer"
                                 onClick={() => navigate(`/product/${product.id}`)}

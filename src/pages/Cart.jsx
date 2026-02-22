@@ -60,7 +60,7 @@ const Cart = () => {
                     {cartItems.map((item) => (
                         <div key={item.id} className="bg-white rounded-lg shadow-md p-4 flex flex-col sm:flex-row gap-4">
                             <img
-                                src={item.image || "product-jpeg-500x500.webp"}
+                                src={item.images?.[0] || item.image || "product-jpeg-500x500.webp"}
                                 alt={item.name}
                                 className="w-full sm:w-24 h-24 object-cover rounded cursor-pointer"
                                 onClick={() => navigate(`/product/${item.id}`)}

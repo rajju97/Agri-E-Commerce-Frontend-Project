@@ -35,6 +35,7 @@ const ProductDetail = () => {
     const [reviewText, setReviewText] = useState('');
     const [reviewRating, setReviewRating] = useState(5);
     const [submitting, setSubmitting] = useState(false);
+    const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
     useEffect(() => {
         const load = async () => {
@@ -46,6 +47,7 @@ const ProductDetail = () => {
                 ]);
                 setProduct(prod);
                 setReviews(revs);
+                setSelectedImageIndex(0);
             } catch (error) {
                 console.error("Error loading product:", error);
             } finally {
@@ -54,6 +56,13 @@ const ProductDetail = () => {
         };
         load();
     }, [id]);
+
+    const getImages = () => {
+        if (!product) return [];
+        if (product.images && product.images.length > 0) return product.images;
+        if (product.image) return [product.image];
+        return [];
+    };
 
     const handleAddToCart = () => {
         if (!product) return;
@@ -94,6 +103,9 @@ const ProductDetail = () => {
     if (loading) return <div className="flex justify-center items-center h-screen"><span className="loading loading-spinner loading-lg"></span></div>;
     if (!product) return <div className="text-center py-20"><h2 className="text-2xl">Product not found</h2><button onClick={() => navigate('/products')} className="btn btn-primary mt-4">Back to Products</button></div>;
 
+    const images = getImages();
+    const displayImage = images[selectedImageIndex] || images[0] || 'product-jpeg-500x500.webp';
+
     return (
         <div className="container mx-auto p-4 max-w-6xl">
             <button onClick={() => navigate(-1)} className="btn btn-ghost mb-4">
@@ -101,13 +113,31 @@ const ProductDetail = () => {
             </button>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* Product Image */}
+                {/* Product Images */}
                 <div className="bg-white rounded-lg shadow-md overflow-hidden">
                     <img
-                        src={product.image || "product-jpeg-500x500.webp"}
+                        src={displayImage}
                         alt={product.name}
                         className="w-full h-96 object-cover"
                     />
+                    {images.length > 1 && (
+                        <div className="flex gap-2 p-3 overflow-x-auto bg-gray-50">
+                            {images.map((img, index) => (
+                                <button
+                                    key={index}
+                                    onClick={() => setSelectedImageIndex(index)}
+                                    className={`flex-shrink-0 w-16 h-16 rounded border-2 overflow-hidden transition-all ${
+                                        index === selectedImageIndex
+                                            ? 'border-primary ring-2 ring-primary/30'
+                                            : 'border-gray-200 hover:border-gray-400'
+                                    }`}
+                                >
+                                    <img src={img} alt={`${product.name} ${index + 1}`}
+                                        className="w-full h-full object-cover" />
+                                </button>
+                            ))}
+                        </div>
+                    )}
                 </div>
 
                 {/* Product Info */}
