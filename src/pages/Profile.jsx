@@ -156,14 +156,27 @@ const Profile = () => {
                             </div>
                         </div>
 
-                        {(profile?.address || profile?.city) && (
-                            <div>
-                                <p className="text-sm text-gray-500">Address</p>
-                                <p className="font-medium">
-                                    {[profile?.address, profile?.city, profile?.state, profile?.pincode].filter(Boolean).join(', ')}
-                                </p>
+                        <div className="border-t pt-4 mt-2">
+                            <h3 className="text-sm font-semibold text-gray-700 mb-3">Address Details</h3>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="sm:col-span-2">
+                                    <p className="text-sm text-gray-500">Street Address</p>
+                                    <p className="font-medium">{profile?.address || 'Not set'}</p>
+                                </div>
+                                <div>
+                                    <p className="text-sm text-gray-500">City</p>
+                                    <p className="font-medium">{profile?.city || 'Not set'}</p>
+                                </div>
+                                <div>
+                                    <p className="text-sm text-gray-500">State</p>
+                                    <p className="font-medium">{profile?.state || 'Not set'}</p>
+                                </div>
+                                <div>
+                                    <p className="text-sm text-gray-500">Pincode</p>
+                                    <p className="font-medium">{profile?.pincode || 'Not set'}</p>
+                                </div>
                             </div>
-                        )}
+                        </div>
 
                         <button onClick={() => setEditing(true)} className="btn btn-primary mt-4">
                             <i className="fas fa-edit mr-2"></i> Edit Profile
