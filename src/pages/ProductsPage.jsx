@@ -12,7 +12,6 @@ const ProductsPage = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('all');
     const [sortBy, setSortBy] = useState('name');
-    const [priceRange, setPriceRange] = useState([0, 10000]);
 
     const categories = ['all', 'Fertilizers', 'Seeds', 'Grains', 'Compost', 'Tools', 'Other'];
 
@@ -42,8 +41,7 @@ const ProductsPage = () => {
                 p.description?.toLowerCase().includes(searchQuery.toLowerCase());
             const matchesCategory = selectedCategory === 'all' ||
                 p.category?.toLowerCase() === selectedCategory.toLowerCase();
-            const matchesPrice = p.price >= priceRange[0] && p.price <= priceRange[1];
-            return matchesSearch && matchesCategory && matchesPrice;
+            return matchesSearch && matchesCategory;
         })
         .sort((a, b) => {
             switch (sortBy) {
