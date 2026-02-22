@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GAIF - User Manual</title>
+<style>
+:root{--p:#4CAF50;--pd:#2E7D32;--a:#1e3778;--s:#795548;--c:#FAF9F6;--g1:#f3f4f6;--g2:#e5e7eb;--g3:#d1d5db;--g5:#6b7280;--g6:#4b5563;--g7:#374151;--g8:#1f2937;--g9:#111827;--bl:#3b82f6;--yl:#f59e0b;--rd:#ef4444;--pr:#8b5cf6}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,-apple-system,sans-serif;color:var(--g8);background:var(--c);line-height:1.7}
+.sb{position:fixed;top:0;left:0;width:260px;height:100vh;background:var(--a);color:#fff;overflow-y:auto;z-index:100;transition:transform .3s}
+.sb-h{padding:20px;border-bottom:1px solid rgba(255,255,255,.1)}
+.sb-h h1{font-size:20px;font-weight:800}
+.sb-h p{font-size:11px;opacity:.6;margin-top:2px}
+.ns{padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+.ns-t{font-size:9px;text-transform:uppercase;letter-spacing:1.5px;opacity:.4;padding:0 20px;margin-bottom:4px}
+.nl{display:flex;align-items:center;gap:8px;padding:8px 20px;color:rgba(255,255,255,.75);text-decoration:none;font-size:13px;cursor:pointer;transition:.2s}
+.nl:hover,.nl.ac{background:rgba(255,255,255,.1);color:#fff}
+.mc{margin-left:260px;min-height:100vh}
+.tb{background:#fff;border-bottom:1px solid var(--g2);padding:12px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.tb .bc{font-size:13px;color:var(--g5)}.tb .bc b{color:var(--g8)}
+.bp{background:var(--p);color:#fff;border:none;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer}
+.bp:hover{background:var(--pd)}
+.ca{padding:28px;max-width:880px}
+.sec{display:none;animation:fi .3s}.sec.ac{display:block}
+@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.st{font-size:26px;font-weight:800;color:var(--g9);margin-bottom:6px}
+.ss{font-size:14px;color:var(--g5);margin-bottom:24px}
+.cd{background:#fff;border-radius:12px;padding:22px;margin-bottom:16px;border:1px solid var(--g2)}
+.ct{font-size:17px;font-weight:700;color:var(--g9);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.ci{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;color:#fff;flex-shrink:0}
+.ci.g{background:var(--p)}.ci.b{background:var(--bl)}.ci.y{background:var(--yl)}.ci.r{background:var(--rd)}.ci.v{background:var(--pr)}.ci.n{background:var(--a)}
+.sps{counter-reset:stp}
+.sp{position:relative;padding-left:44px;padding-bottom:20px;border-left:2px solid var(--g2);margin-left:14px}
+.sp:last-child{border-left-color:transparent;padding-bottom:0}
+.sp::before{counter-increment:stp;content:counter(stp);position:absolute;left:-15px;top:0;width:28px;height:28px;border-radius:50%;background:var(--p);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+.sp-t{font-weight:600;font-size:14px;color:var(--g9)}.sp-d{font-size:13px;color:var(--g6)}
+.ib{border-radius:10px;padding:14px 18px;margin:14px 0;font-size:13px;display:flex;gap:10px;align-items:flex-start}
+.ib .ii{font-size:16px;flex-shrink:0}.ib.tp{background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46}.ib.wn{background:#fffbeb;border:1px solid #fde68a;color:#92400e}.ib.nt{background:#eff6ff;border:1px solid #bfdbfe;color:#1e40af}
+.tw{overflow-x:auto;margin:14px 0}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:var(--g1);text-align:left;padding:9px 12px;font-weight:600;color:var(--g7);border-bottom:2px solid var(--g2)}
+td{padding:9px 12px;border-bottom:1px solid var(--g1);color:var(--g6)}
+tr:hover td{background:#f9fafb}
+.tg{display:inline-block;padding:1px 8px;border-radius:10px;font-size:11px;font-weight:600}
+.tg.g{background:#dcfce7;color:#166534}.tg.b{background:#dbeafe;color:#1e40af}.tg.y{background:#fef3c7;color:#92400e}.tg.r{background:#fee2e2;color:#991b1b}.tg.v{background:#ede9fe;color:#5b21b6}.tg.gr{background:var(--g1);color:var(--g6)}
+kbd{background:var(--g1);border:1px solid var(--g3);border-radius:4px;padding:1px 5px;font-size:11px;font-family:inherit;font-weight:500}
+.rg{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:18px 0}
+.rc{background:#fff;border:2px solid var(--g2);border-radius:12px;padding:18px;text-align:center;transition:.2s}
+.rc:hover{border-color:var(--p);box-shadow:0 4px 12px rgba(76,175,80,.12)}
+.ri{width:44px;height:44px;border-radius:50%;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff}
+.rc h3{font-size:15px;font-weight:700;margin-bottom:4px}.rc p{font-size:12px;color:var(--g5)}
+.fl{list-style:none;margin:10px 0}
+.fl li{padding:6px 0 6px 22px;position:relative;font-size:13px;color:var(--g6)}
+.fl li::before{content:"\2713";position:absolute;left:0;color:var(--p);font-weight:700}
+.fw{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:14px 0}
+.fi{background:#fff;border:2px solid var(--g2);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;color:var(--g7)}
+.fa{color:var(--p);font-size:16px;font-weight:700}
+.co{border:1px solid var(--g2);border-radius:10px;margin-bottom:8px;overflow:hidden;background:#fff}
+.ch{padding:12px 18px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;font-weight:600;font-size:14px;color:var(--g8);user-select:none}
+.ch:hover{background:#f9fafb}
+.ch .aw{transition:transform .3s;font-size:11px;color:var(--g3)}
+.co.op .ch .aw{transform:rotate(180deg)}
+.cb{max-height:0;overflow:hidden;transition:max-height .3s}
+.co.op .cb{max-height:1500px}
+.cbi{padding:0 18px 16px;font-size:13px;color:var(--g6)}
+.cv{text-align:center;padding:50px 20px}
+.cl{width:72px;height:72px;border-radius:18px;background:var(--p);margin:0 auto 20px;display:flex;align-items:center;justify-content:center;font-size:32px;color:#fff;font-weight:800}
+.cv h1{font-size:32px;font-weight:800;color:var(--g9)}
+.cv .cs{font-size:16px;color:var(--p);font-weight:600;margin-top:2px}
+.cv .cd2{font-size:14px;color:var(--g5);max-width:460px;margin:12px auto 0}
+.cv .vr{margin-top:28px;font-size:11px;color:var(--g3)}
+.mt{display:none;position:fixed;top:10px;left:10px;z-index:200;background:var(--a);color:#fff;border:none;border-radius:8px;width:38px;height:38px;font-size:16px;cursor:pointer}
+.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:90}
+@media print{.sb,.tb,.mt,.ov,.bp{display:none!important}.mc{margin-left:0!important}.ca{max-width:100%;padding:16px}.sec{display:block!important;page-break-inside:avoid;margin-bottom:28px}.cd{break-inside:avoid}body{background:#fff;font-size:11px}}
+@media(max-width:768px){.sb{transform:translateX(-100%)}.sb.op{transform:translateX(0)}.ov.op{display:block}.mt{display:flex;align-items:center;justify-content:center}.mc{margin-left:0}.rg{grid-template-columns:1fr}.ca{padding:16px 12px}}
+</style>
+</head>
+<body>
+
+<button class="mt" onclick="tS()">&#9776;</button>
+<div class="ov" id="ov" onclick="tS()"></div>
+
+<nav class="sb" id="sb">
+<div class="sb-h"><h1>GAIF Manual</h1><p>Ganga Agri Innovation Foundation</p></div>
+<div class="ns"><div class="ns-t">Getting Started</div>
+<a class="nl ac" onclick="go('welcome',this)">&#127793; Welcome</a>
+<a class="nl" onclick="go('overview',this)">&#128196; Platform Overview</a>
+<a class="nl" onclick="go('roles',this)">&#128101; User Roles</a>
+<a class="nl" onclick="go('registration',this)">&#128221; Registration</a>
+<a class="nl" onclick="go('login',this)">&#128274; Login</a>
+</div>
+<div class="ns"><div class="ns-t">Customer Guide</div>
+<a class="nl" onclick="go('home',this)">&#127968; Home Page</a>
+<a class="nl" onclick="go('browsing',this)">&#128269; Browsing Products</a>
+<a class="nl" onclick="go('product-detail',this)">&#128230; Product Details</a>
+<a class="nl" onclick="go('cart',this)">&#128722; Shopping Cart</a>
+<a class="nl" onclick="go('checkout',this)">&#128179; Checkout</a>
+<a class="nl" onclick="go('orders',this)">&#128666; Order History</a>
+<a class="nl" onclick="go('profile',this)">&#128100; My Profile</a>
+</div>
+<div class="ns"><div class="ns-t">Seller Guide</div>
+<a class="nl" onclick="go('seller-dash',this)">&#128202; Seller Dashboard</a>
+<a class="nl" onclick="go('add-product',this)">&#10133; Adding Products</a>
+<a class="nl" onclick="go('ai',this)">&#129302; AI Features</a>
+<a class="nl" onclick="go('seller-orders',this)">&#128230; Managing Orders</a>
+</div>
+<div class="ns"><div class="ns-t">Admin Guide</div>
+<a class="nl" onclick="go('admin',this)">&#128737; Admin Dashboard</a>
+<a class="nl" onclick="go('admin-users',this)">&#128101; User Management</a>
+<a class="nl" onclick="go('admin-orders',this)">&#128230; Order Management</a>
+</div>
+<div class="ns"><div class="ns-t">Help</div>
+<a class="nl" onclick="go('faq',this)">&#10067; FAQ</a>
+<a class="nl" onclick="go('contact',this)">&#128222; Contact & Support</a>
+</div>
+</nav>
+
+<div class="mc">
+<div class="tb"><div class="bc">Manual &rsaquo; <b id="bct">Welcome</b></div><button class="bp" onclick="window.print()">&#128424; Save as PDF</button></div>
+<div class="ca">
+
+<!-- WELCOME -->
+<div class="sec ac" id="s-welcome">
+<div class="cv">
+<div class="cl">G</div>
+<h1>GAIF Platform</h1>
+<p class="cs">User Manual</p>
+<p class="cd2">Complete guide for customers, sellers, and administrators of the Ganga Agri Innovation Foundation agricultural e-commerce platform.</p>
+<p class="vr">Version 1.0 &middot; February 2026</p>
+</div>
+<div class="cd" style="text-align:center">
+<p style="font-size:13px;color:var(--g5);margin-bottom:14px">Quick Jump</p>
+<div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+<button onclick="go('registration',null)" style="background:var(--p);color:#fff;border:none;padding:9px 18px;border-radius:8px;font-weight:600;cursor:pointer;font-size:12px">New User</button>
+<button onclick="go('browsing',null)" style="background:var(--a);color:#fff;border:none;padding:9px 18px;border-radius:8px;font-weight:600;cursor:pointer;font-size:12px">Shop Products</button>
+<button onclick="go('seller-dash',null)" style="background:var(--s);color:#fff;border:none;padding:9px 18px;border-radius:8px;font-weight:600;cursor:pointer;font-size:12px">Seller Guide</button>
+<button onclick="go('admin',null)" style="background:var(--g7);color:#fff;border:none;padding:9px 18px;border-radius:8px;font-weight:600;cursor:pointer;font-size:12px">Admin Guide</button>
+</div>
+</div>
+</div>
+
+<!-- OVERVIEW -->
+<div class="sec" id="s-overview">
+<h2 class="st">Platform Overview</h2>
+<p class="ss">What is GAIF and how does it work?</p>
+<div class="cd"><div class="ct"><div class="ci g">&#127793;</div> About GAIF</div>
+<p>GAIF (Ganga Agri Innovation Foundation) is an agricultural e-commerce platform that connects farmers directly with consumers. The platform eliminates middlemen, ensuring fair prices for farmers and fresh, quality products for buyers.</p></div>
+<div class="cd"><div class="ct"><div class="ci b">&#9881;</div> How It Works</div>
+<div class="sps">
+<div class="sp"><div class="sp-t">Register an Account</div><div class="sp-d">Create an account as a Customer (to buy) or Seller (to sell products).</div></div>
+<div class="sp"><div class="sp-t">Browse & Discover</div><div class="sp-d">Explore products across categories: Fertilizers, Seeds, Grains, Compost, and Tools.</div></div>
+<div class="sp"><div class="sp-t">Add to Cart & Order</div><div class="sp-d">Select products, choose quantities, and place your order with your preferred payment method.</div></div>
+<div class="sp"><div class="sp-t">Track & Receive</div><div class="sp-d">Track your order status and receive products at your doorstep.</div></div>
+</div></div>
+<div class="cd"><div class="ct"><div class="ci n">&#128209;</div> Product Categories</div>
+<div class="tw"><table>
+<tr><th>Category</th><th>Description</th></tr>
+<tr><td><b>Fertilizers</b></td><td>Organic and chemical fertilizers to improve soil fertility</td></tr>
+<tr><td><b>Seeds</b></td><td>High-quality seeds for all types of crops</td></tr>
+<tr><td><b>Grains</b></td><td>Organic grains for consumption and sowing</td></tr>
+<tr><td><b>Compost</b></td><td>Compost for enhancing soil nutrients</td></tr>
+<tr><td><b>Tools</b></td><td>Essential farming tools and equipment</td></tr>
+<tr><td><b>Other</b></td><td>Miscellaneous agricultural products</td></tr>
+</table></div></div>
+</div>
+
+<!-- ROLES -->
+<div class="sec" id="s-roles">
+<h2 class="st">User Roles</h2>
+<p class="ss">Three user roles, each with different permissions.</p>
+<div class="rg">
+<div class="rc"><div class="ri" style="background:var(--p)">&#128722;</div><h3>Customer</h3><p>Browse, buy, review, and track orders.</p></div>
+<div class="rc"><div class="ri" style="background:var(--a)">&#127981;</div><h3>Seller</h3><p>All customer abilities + list products, manage inventory, AI tools.</p></div>
+<div class="rc"><div class="ri" style="background:var(--s)">&#128737;</div><h3>Admin</h3><p>Full access: manage users, products, and all orders.</p></div>
+</div>
+<div class="cd"><div class="ct">Access Permissions</div>
+<div class="tw"><table>
+<tr><th>Feature</th><th>Customer</th><th>Seller</th><th>Admin</th></tr>
+<tr><td>Browse Products</td><td><span class="tg g">Yes</span></td><td><span class="tg g">Yes</span></td><td><span class="tg g">Yes</span></td></tr>
+<tr><td>Add to Cart / Order</td><td><span class="tg g">Yes</span></td><td><span class="tg g">Yes</span></td><td><span class="tg g">Yes</span></td></tr>
+<tr><td>Write Reviews</td><td><span class="tg g">Yes</span></td><td><span class="tg g">Yes</span></td><td><span class="tg g">Yes</span></td></tr>
+<tr><td>Seller Dashboard</td><td><span class="tg r">No</span></td><td><span class="tg g">Yes</span></td><td><span class="tg g">Yes</span></td></tr>
+<tr><td>AI Description/Image</td><td><span class="tg r">No</span></td><td><span class="tg g">Yes</span></td><td><span class="tg g">Yes</span></td></tr>
+<tr><td>Admin Dashboard</td><td><span class="tg r">No</span></td><td><span class="tg r">No</span></td><td><span class="tg g">Yes</span></td></tr>
+<tr><td>Manage All Users</td><td><span class="tg r">No</span></td><td><span class="tg r">No</span></td><td><span class="tg g">Yes</span></td></tr>
+</table></div></div>
+</div>
+
+<!-- REGISTRATION -->
+<div class="sec" id="s-registration">
+<h2 class="st">Registration</h2>
+<p class="ss">Create your GAIF account in a few simple steps.</p>
+<div class="cd"><div class="ct"><div class="ci g">&#128221;</div> How to Register</div>
+<div class="sps">
+<div class="sp"><div class="sp-t">Navigate to the Registration Page</div><div class="sp-d">Click <b>Register</b> in the top navigation bar, or visit <kbd>/register</kbd>.</div></div>
+<div class="sp"><div class="sp-t">Fill in Your Details</div><div class="sp-d">Enter your email, mobile number (10 digits), and choose a password (min 6 characters).</div></div>
+<div class="sp"><div class="sp-t">Select Your Role</div><div class="sp-d">Choose <b>Customer</b> to buy products, or <b>Seller</b> to sell.</div></div>
+<div class="sp"><div class="sp-t">Confirm Password & Submit</div><div class="sp-d">Re-enter your password and click <b>Register</b>. You'll be redirected based on your role.</div></div>
+</div></div>
+<div class="cd"><div class="ct">Registration Fields</div>
+<div class="tw"><table>
+<tr><th>Field</th><th>Required</th><th>Validation</th></tr>
+<tr><td>Email</td><td><span class="tg g">Yes</span></td><td>Valid email format</td></tr>
+<tr><td>Mobile No.</td><td><span class="tg g">Yes</span></td><td>Exactly 10 digits</td></tr>
+<tr><td>Role</td><td><span class="tg g">Yes</span></td><td>Customer or Seller</td></tr>
+<tr><td>Password</td><td><span class="tg g">Yes</span></td><td>Minimum 6 characters</td></tr>
+<tr><td>Confirm Password</td><td><span class="tg g">Yes</span></td><td>Must match password</td></tr>
+</table></div></div>
+<div class="ib tp"><span class="ii">&#128161;</span><div><b>Tip:</b> Already have an account? Click <b>"Already have an account? Login"</b> link at the bottom of the registration form.</div></div>
+</div>
+
+<!-- LOGIN -->
+<div class="sec" id="s-login">
+<h2 class="st">Login</h2>
+<p class="ss">Access your account by signing in.</p>
+<div class="cd"><div class="ct"><div class="ci n">&#128274;</div> How to Login</div>
+<div class="sps">
+<div class="sp"><div class="sp-t">Go to the Login Page</div><div class="sp-d">Click <b>Login</b> in the navigation bar, or visit <kbd>/login</kbd>.</div></div>
+<div class="sp"><div class="sp-t">Enter Your Credentials</div><div class="sp-d">Type your registered email and password.</div></div>
+<div class="sp"><div class="sp-t">You'll Be Redirected</div><div class="sp-d"><b>Customers</b> &rarr; Home Page &bull; <b>Sellers</b> &rarr; Seller Dashboard &bull; <b>Admins</b> &rarr; Admin Dashboard</div></div>
+</div></div>
+<div class="ib wn"><span class="ii">&#9888;</span><div><b>Trouble Logging In?</b> Check your email/password. Make sure Caps Lock is off. Contact admin for password reset.</div></div>
+</div>
+
+<!-- HOME -->
+<div class="sec" id="s-home">
+<h2 class="st">Home Page</h2>
+<p class="ss">Your starting point for exploring the platform.</p>
+<div class="cd"><div class="ct"><div class="ci g">&#127968;</div> Page Sections</div>
+<div class="co op"><div class="ch" onclick="tc(this)">Hero Banner <span class="aw">&#9660;</span></div><div class="cb"><div class="cbi">Large banner with a farming background, welcome headline, and two buttons: <b>Shop Now</b> (goes to Products) and <b>Become a Seller</b> (goes to Register).</div></div></div>
+<div class="co"><div class="ch" onclick="tc(this)">Shop by Category <span class="aw">&#9660;</span></div><div class="cb"><div class="cbi">Five interactive cards: <b>Fertilizers, Seeds, Grains, Compost, Tools</b>. Hover for description. Click to browse.</div></div></div>
+<div class="co"><div class="ch" onclick="tc(this)">Featured Products <span class="aw">&#9660;</span></div><div class="cb"><div class="cbi">Displays up to <b>8 products</b> in a grid. Each card shows image, name, price, and Add to Cart button. Click <b>"View All"</b> to see all products.</div></div></div>
+<div class="co"><div class="ch" onclick="tc(this)">How It Works & More <span class="aw">&#9660;</span></div><div class="cb"><div class="cbi">3-step guide, "Why Choose Us" features (Eco-Friendly, High Quality, Best Prices, Fast Delivery), seller call-to-action, and footer with links.</div></div></div>
+</div>
+</div>
+
+<!-- BROWSING -->
+<div class="sec" id="s-browsing">
+<h2 class="st">Browsing Products</h2>
+<p class="ss">Find exactly what you need with search, filters, and sorting.</p>
+<div class="cd"><div class="ct"><div class="ci b">&#128269;</div> Search & Filter Tools</div>
+<div class="tw"><table>
+<tr><th>Tool</th><th>How It Works</th></tr>
+<tr><td><b>Search Bar</b></td><td>Type keywords to search by product name or description. Results update in real time.</td></tr>
+<tr><td><b>Category Filter</b></td><td>Select: All, Fertilizers, Seeds, Grains, Compost, Tools, or Other.</td></tr>
+<tr><td><b>Sort By</b></td><td>Sort by Name (A-Z), Price: Low to High, or Price: High to Low.</td></tr>
+</table></div></div>
+<div class="cd"><div class="ct"><div class="ci g">&#128230;</div> Product Cards</div>
+<ul class="fl">
+<li><b>Product Image</b> &mdash; Click to view details</li>
+<li><b>Product Name</b> &mdash; Click to view details</li>
+<li><b>Description</b> &mdash; Brief 2-line summary</li>
+<li><b>Price</b> &mdash; In Indian Rupees (&#8377;)</li>
+<li><b>Stock Status</b> &mdash; Green "In Stock" or Red "Out of Stock"</li>
+<li><b>Add to Cart</b> &mdash; Disabled if out of stock</li>
+</ul></div>
+<div class="ib nt"><span class="ii">&#128214;</span><div>Results count (e.g., "12 products found") is shown above the grid so you always know how many products match.</div></div>
+</div>
+
+<!-- PRODUCT DETAIL -->
+<div class="sec" id="s-product-detail">
+<h2 class="st">Product Details</h2>
+<p class="ss">View complete product info, images, and customer reviews.</p>
+<div class="cd"><div class="ct"><div class="ci v">&#128247;</div> Product Information</div>
+<ul class="fl">
+<li><b>Image Gallery</b> &mdash; Multiple images with thumbnail navigation</li>
+<li><b>Star Rating</b> &mdash; Average customer rating (1-5 stars)</li>
+<li><b>Price</b> &mdash; Prominent display in Rupees</li>
+<li><b>Full Description</b> &mdash; Complete product details</li>
+<li><b>Stock Availability</b> &mdash; Shows available quantity</li>
+<li><b>Seller Info</b> &mdash; Shows seller email</li>
+</ul></div>
+<div class="cd"><div class="ct"><div class="ci g">&#128722;</div> Adding to Cart</div>
+<div class="sps">
+<div class="sp"><div class="sp-t">Select Quantity</div><div class="sp-d">Use <b>+</b> / <b>-</b> buttons (up to available stock).</div></div>
+<div class="sp"><div class="sp-t">Click "Add to Cart"</div><div class="sp-d">Product is added to your cart with the selected quantity.</div></div>
+</div></div>
+<div class="cd"><div class="ct"><div class="ci y">&#11088;</div> Customer Reviews</div>
+<p>Read reviews from other customers at the bottom of every product page.</p>
+<div class="ib tp"><span class="ii">&#128161;</span><div><b>Write a Review:</b> Log in, click stars to rate (1-5), type your review, and hit <b>Submit Review</b>.</div></div>
+</div>
+</div>
+
+<!-- CART -->
+<div class="sec" id="s-cart">
+<h2 class="st">Shopping Cart</h2>
+<p class="ss">Review and manage items before checkout.</p>
+<div class="cd"><div class="ct"><div class="ci g">&#128722;</div> Cart Features</div>
+<ul class="fl">
+<li><b>View Items</b> &mdash; All products with images, names, prices</li>
+<li><b>Adjust Quantity</b> &mdash; Use +/- buttons for each item</li>
+<li><b>Remove Item</b> &mdash; Decrease quantity to 0 to remove</li>
+<li><b>Clear Cart</b> &mdash; Remove all items (requires confirmation)</li>
+<li><b>Line Totals</b> &mdash; Price &times; quantity for each item</li>
+<li><b>Free Shipping</b> &mdash; Always free</li>
+</ul></div>
+<div class="cd"><div class="ct"><div class="ci n">&#128179;</div> Order Summary Sidebar</div>
+<ul class="fl">
+<li>Total item count and subtotal</li>
+<li>Shipping cost (Free)</li>
+<li>Grand total amount</li>
+<li><b>Proceed to Checkout</b> button (requires login)</li>
+<li><b>Continue Shopping</b> button</li>
+</ul></div>
+<div class="ib wn"><span class="ii">&#9888;</span><div><b>Not Logged In?</b> You can browse and add items without logging in. You'll be asked to log in when clicking <b>Proceed to Checkout</b>.</div></div>
+</div>
+
+<!-- CHECKOUT -->
+<div class="sec" id="s-checkout">
+<h2 class="st">Checkout</h2>
+<p class="ss">Complete your order with shipping details and payment.</p>
+<div class="cd"><div class="ct"><div class="ci g">&#128230;</div> Checkout Steps</div>
+<div class="sps">
+<div class="sp"><div class="sp-t">Enter Shipping Address</div><div class="sp-d">Full Name, Phone, Address, City, State, and Pincode. All required.</div></div>
+<div class="sp"><div class="sp-t">Select Payment Method</div><div class="sp-d"><b>Cash on Delivery</b>, <b>UPI Payment</b>, or <b>Credit/Debit Card</b>.</div></div>
+<div class="sp"><div class="sp-t">Review Order Summary</div><div class="sp-d">Check items, quantities, and total in the sidebar.</div></div>
+<div class="sp"><div class="sp-t">Place Order</div><div class="sp-d">Click <b>Place Order</b>. Confirmation screen shows your Order ID.</div></div>
+</div></div>
+<div class="cd"><div class="ct">Shipping Address Fields</div>
+<div class="tw"><table>
+<tr><th>Field</th><th>Example</th></tr>
+<tr><td>Full Name</td><td>Rajesh Kumar</td></tr>
+<tr><td>Phone Number</td><td>9876543210</td></tr>
+<tr><td>Address</td><td>123, Green Valley Road</td></tr>
+<tr><td>City</td><td>New Delhi</td></tr>
+<tr><td>State</td><td>Delhi</td></tr>
+<tr><td>Pincode</td><td>110001</td></tr>
+</table></div></div>
+<div class="ib tp"><span class="ii">&#128161;</span><div><b>After Ordering:</b> You'll see options to <b>View My Orders</b> or <b>Continue Shopping</b>. Cart is cleared automatically.</div></div>
+</div>
+
+<!-- ORDERS -->
+<div class="sec" id="s-orders">
+<h2 class="st">Order History</h2>
+<p class="ss">Track all your past and current orders.</p>
+<div class="cd"><div class="ct"><div class="ci b">&#128666;</div> Order Information</div>
+<ul class="fl">
+<li><b>Order ID</b> &mdash; Unique identifier</li>
+<li><b>Order Date</b> &mdash; When placed</li>
+<li><b>Status Badge</b> &mdash; Color-coded current status</li>
+<li><b>Items List</b> &mdash; Products with images, quantities, prices</li>
+<li><b>Payment Method</b> &mdash; COD, UPI, or Card</li>
+<li><b>Shipping City & State</b></li>
+<li><b>Order Total</b></li>
+</ul></div>
+<div class="cd"><div class="ct"><div class="ci n">&#128204;</div> Order Status Flow</div>
+<div class="fw">
+<div class="fi"><span class="tg y">Pending</span></div><span class="fa">&rarr;</span>
+<div class="fi"><span class="tg b">Confirmed</span></div><span class="fa">&rarr;</span>
+<div class="fi"><span class="tg g">Shipped</span></div><span class="fa">&rarr;</span>
+<div class="fi"><span class="tg g">Delivered</span></div>
+</div>
+<p style="font-size:12px;color:var(--g5);margin-top:6px">Orders can also be <span class="tg r">Cancelled</span> by the seller at any stage before delivery.</p>
+</div>
+</div>
+
+<!-- PROFILE -->
+<div class="sec" id="s-profile">
+<h2 class="st">My Profile</h2>
+<p class="ss">View and manage your personal information.</p>
+<div class="cd"><div class="ct"><div class="ci v">&#128100;</div> Profile Information</div>
+<ul class="fl">
+<li><b>Avatar</b> &mdash; Email initial in a green circle</li>
+<li><b>Display Name</b>, <b>Email</b>, <b>Phone</b></li>
+<li><b>Role Badge</b> &mdash; CUSTOMER, SELLER, or ADMIN</li>
+<li><b>Address Details</b> &mdash; Street, City, State, Pincode</li>
+</ul></div>
+<div class="cd"><div class="ct"><div class="ci g">&#9998;</div> Editing Your Profile</div>
+<div class="sps">
+<div class="sp"><div class="sp-t">Click "Edit Profile"</div><div class="sp-d">Switches to editable form.</div></div>
+<div class="sp"><div class="sp-t">Update Your Details</div><div class="sp-d">Change Display Name, Phone, Address, City, State, or Pincode.</div></div>
+<div class="sp"><div class="sp-t">Save Changes</div><div class="sp-d">Click <b>Save Changes</b> to update, or <b>Cancel</b> to discard.</div></div>
+</div></div>
+</div>
+
+<!-- SELLER DASHBOARD -->
+<div class="sec" id="s-seller-dash">
+<h2 class="st">Seller Dashboard</h2>
+<p class="ss">Your central hub for managing products and tracking sales.</p>
+<div class="cd"><div class="ct"><div class="ci b">&#128202;</div> Dashboard Stats</div>
+<div class="tw"><table>
+<tr><th>Stat</th><th>Description</th></tr>
+<tr><td><b>Products</b></td><td>Total number of your listed products</td></tr>
+<tr><td><b>Total Orders</b></td><td>All orders received for your products</td></tr>
+<tr><td><b>Pending</b></td><td>Orders awaiting confirmation</td></tr>
+<tr><td><b>Revenue</b></td><td>Total earnings from delivered orders</td></tr>
+</table></div></div>
+<div class="cd"><div class="ct"><div class="ci g">&#128203;</div> Your Product List</div>
+<p>The right column shows all your listed products:</p>
+<ul class="fl">
+<li>Product image with image count badge</li>
+<li>Name, description, price, quantity, category</li>
+<li><b>Edit button</b> &mdash; Loads product into form</li>
+<li><b>Delete button</b> &mdash; Removes product (confirmation required)</li>
+</ul></div>
+<div class="ib nt"><span class="ii">&#128214;</span><div>Click <b>Manage Orders</b> at the top-right to view seller orders. A badge shows pending order count.</div></div>
+</div>
+
+<!-- ADD PRODUCT -->
+<div class="sec" id="s-add-product">
+<h2 class="st">Adding Products</h2>
+<p class="ss">List new products for customers to discover and buy.</p>
+<div class="cd"><div class="ct"><div class="ci g">&#10133;</div> Product Form Fields</div>
+<div class="tw"><table>
+<tr><th>Field</th><th>Type</th><th>Details</th></tr>
+<tr><td>Product Name</td><td>Text</td><td>Required. Clear, descriptive name.</td></tr>
+<tr><td>Category</td><td>Dropdown</td><td>Fertilizers, Seeds, Grains, Compost, Tools, Other</td></tr>
+<tr><td>Description</td><td>Textarea</td><td>Required. Describe product (or use AI).</td></tr>
+<tr><td>Price (&#8377;)</td><td>Number</td><td>Required. Price in Rupees.</td></tr>
+<tr><td>Quantity</td><td>Number</td><td>Required. Available stock.</td></tr>
+<tr><td>Images</td><td>Upload/URL</td><td>Up to 5 images. First = cover photo.</td></tr>
+</table></div></div>
+<div class="cd"><div class="ct"><div class="ci v">&#128247;</div> Adding Product Images</div>
+<p>Three ways to add images:</p>
+<div class="co op"><div class="ch" onclick="tc(this)">Upload from Device <span class="aw">&#9660;</span></div><div class="cb"><div class="cbi">Click <b>"Upload Images"</b>. Supported: <span class="tg gr">JPEG</span> <span class="tg gr">PNG</span> <span class="tg gr">WebP</span> <span class="tg gr">GIF</span>. Max 5MB. Auto-compressed.</div></div></div>
+<div class="co"><div class="ch" onclick="tc(this)">Paste Image URL <span class="aw">&#9660;</span></div><div class="cb"><div class="cbi">Paste any valid image URL and click <b>"Add"</b> or press Enter.</div></div></div>
+<div class="co"><div class="ch" onclick="tc(this)">AI-Generated Image <span class="aw">&#9660;</span></div><div class="cb"><div class="cbi">Click <b>"AI Image"</b> button to generate from product name. See AI Features section.</div></div></div>
+<div class="ib tp" style="margin-top:14px"><span class="ii">&#128161;</span><div>The <b>first image</b> becomes the cover photo on product cards.</div></div>
+</div>
+<div class="cd"><div class="ct"><div class="ci b">&#9998;</div> Editing Products</div>
+<div class="sps">
+<div class="sp"><div class="sp-t">Click the Edit Button</div><div class="sp-d">Blue pencil icon on any product in your list.</div></div>
+<div class="sp"><div class="sp-t">Modify the Form</div><div class="sp-d">Form populates with current details. Change what you need.</div></div>
+<div class="sp"><div class="sp-t">Click "Update Product"</div><div class="sp-d">Save changes, or <b>Cancel</b> to discard.</div></div>
+</div></div>
+</div>
+
+<!-- AI FEATURES -->
+<div class="sec" id="s-ai">
+<h2 class="st">AI Features</h2>
+<p class="ss">AI-powered tools to create compelling product listings faster.</p>
+<div class="cd"><div class="ct"><div class="ci v">&#129302;</div> AI Description Generator</div>
+<div class="sps">
+<div class="sp"><div class="sp-t">Enter a Product Name</div><div class="sp-d">Type the name first (e.g., "Organic Neem Fertilizer").</div></div>
+<div class="sp"><div class="sp-t">Click "AI Description"</div><div class="sp-d">Shows "Generating..." while AI creates a description.</div></div>
+<div class="sp"><div class="sp-t">Review & Edit</div><div class="sp-d">Description appears in the field. Edit it before saving.</div></div>
+</div></div>
+<div class="cd"><div class="ct"><div class="ci b">&#127912;</div> AI Image Generator</div>
+<div class="sps">
+<div class="sp"><div class="sp-t">Enter a Product Name</div><div class="sp-d">Make sure product name is filled in.</div></div>
+<div class="sp"><div class="sp-t">Click "AI Image"</div><div class="sp-d">Shows "Generating..." while AI creates an image.</div></div>
+<div class="sp"><div class="sp-t">Image Added Automatically</div><div class="sp-d">Generated image joins your gallery. Remove like any other image.</div></div>
+</div></div>
+<div class="ib nt"><span class="ii">&#128214;</span><div><b>Powered by Gemini AI:</b> Uses Google's Gemini model for high-quality agricultural product descriptions and images.</div></div>
+</div>
+
+<!-- SELLER ORDERS -->
+<div class="sec" id="s-seller-orders">
+<h2 class="st">Managing Orders (Seller)</h2>
+<p class="ss">View, filter, and manage orders for your products.</p>
+<div class="cd"><div class="ct"><div class="ci n">&#128230;</div> Order Management</div>
+<p><b>Filter Tabs:</b></p>
+<div style="display:flex;gap:5px;flex-wrap:wrap;margin:8px 0 14px">
+<span class="tg gr">All</span><span class="tg y">Pending</span><span class="tg b">Confirmed</span><span class="tg g">Shipped</span><span class="tg g">Delivered</span><span class="tg r">Cancelled</span>
+</div>
+<p><b>Stat Cards:</b> Quick counts by status (Pending, Confirmed, Shipped, Delivered).</p>
+</div>
+<div class="cd"><div class="ct"><div class="ci g">&#128260;</div> Updating Order Status</div>
+<div class="fw">
+<div class="fi">Pending</div><span class="fa">&rarr;</span>
+<div class="fi">Confirmed</div><span class="fa">&rarr;</span>
+<div class="fi">Shipped</div><span class="fa">&rarr;</span>
+<div class="fi">Delivered</div>
+</div>
+<div class="ib wn" style="margin-top:14px"><span class="ii">&#9888;</span><div><b>Cancel:</b> Click the red Cancel button on any undelivered order. Cannot be undone.</div></div>
+</div>
+<div class="cd"><div class="ct"><div class="ci b">&#128220;</div> Order Details</div>
+<ul class="fl">
+<li>Order ID and date</li>
+<li>Buyer's email address</li>
+<li>All items with images, quantities, prices</li>
+<li>Shipping: name, phone, full address</li>
+<li>Order total amount</li>
+</ul></div>
+</div>
+
+<!-- ADMIN DASHBOARD -->
+<div class="sec" id="s-admin">
+<h2 class="st">Admin Dashboard</h2>
+<p class="ss">Complete platform management for administrators.</p>
+<div class="cd"><div class="ct"><div class="ci n">&#128202;</div> Platform Stats</div>
+<div class="tw"><table>
+<tr><th>Stat</th><th>Description</th></tr>
+<tr><td><span class="tg b">Total Users</span></td><td>All registered accounts</td></tr>
+<tr><td><span class="tg v">Sellers</span></td><td>Registered sellers</td></tr>
+<tr><td><span class="tg g">Products</span></td><td>Total listed products</td></tr>
+<tr><td><span class="tg y">Total Orders</span></td><td>All platform orders</td></tr>
+<tr><td><span class="tg g">Revenue</span></td><td>Earnings from delivered orders</td></tr>
+</table></div></div>
+<div class="cd"><div class="ct"><div class="ci g">&#128196;</div> Dashboard Tabs</div>
+<div class="co op"><div class="ch" onclick="tc(this)">Overview <span class="aw">&#9660;</span></div><div class="cb"><div class="cbi"><ul class="fl"><li><b>Recent Orders</b> (last 10) &mdash; ID, buyer, status, total</li><li><b>Users Overview</b> (last 10) &mdash; Email and role badge</li></ul></div></div></div>
+<div class="co"><div class="ch" onclick="tc(this)">Users <span class="aw">&#9660;</span></div><div class="cb"><div class="cbi">Full table of all users: email, role, phone, and <b>Delete</b> button.</div></div></div>
+<div class="co"><div class="ch" onclick="tc(this)">Products <span class="aw">&#9660;</span></div><div class="cb"><div class="cbi">Full table of all products: image, name, price, qty, seller, and <b>Delete</b> button.</div></div></div>
+<div class="co"><div class="ch" onclick="tc(this)">Orders <span class="aw">&#9660;</span></div><div class="cb"><div class="cbi">All orders with 5 status buttons each (Pending, Confirmed, Shipped, Delivered, Cancelled) to quickly update status.</div></div></div>
+</div>
+</div>
+
+<!-- ADMIN USERS -->
+<div class="sec" id="s-admin-users">
+<h2 class="st">User Management (Admin)</h2>
+<p class="ss">View and manage all registered users.</p>
+<div class="cd"><div class="ct"><div class="ci r">&#128101;</div> Managing Users</div>
+<p>In the <b>Users</b> tab:</p>
+<ul class="fl">
+<li>View all users (email, role, phone)</li>
+<li>Identify roles with color-coded badges</li>
+<li>Delete accounts (confirmation required)</li>
+</ul>
+<div class="ib wn"><span class="ii">&#9888;</span><div><b>Caution:</b> Deleting a user is permanent. Products and orders are not auto-removed.</div></div>
+</div>
+</div>
+
+<!-- ADMIN ORDERS -->
+<div class="sec" id="s-admin-orders">
+<h2 class="st">Order Management (Admin)</h2>
+<p class="ss">View and update status of all orders platform-wide.</p>
+<div class="cd"><div class="ct"><div class="ci y">&#128230;</div> Admin Order Controls</div>
+<p>Admins can set <b>any status</b> on any order:</p>
+<div style="display:flex;gap:5px;flex-wrap:wrap;margin:10px 0">
+<span class="tg y">Pending</span><span class="tg b">Confirmed</span><span class="tg g">Shipped</span><span class="tg g">Delivered</span><span class="tg r">Cancelled</span>
+</div>
+<p style="font-size:13px;color:var(--g6)">Click any status button to instantly update. Current status is disabled.</p>
+</div>
+</div>
+
+<!-- FAQ -->
+<div class="sec" id="s-faq">
+<h2 class="st">Frequently Asked Questions</h2>
+<p class="ss">Quick answers to common questions.</p>
+<div class="co op"><div class="ch" onclick="tc(this)">How do I create an account? <span class="aw">&#9660;</span></div><div class="cb"><div class="cbi">Click <b>Register</b> in the nav bar. Fill in email, mobile, role, password, and submit.</div></div></div>
+<div class="co"><div class="ch" onclick="tc(this)">Can I be both a buyer and a seller? <span class="aw">&#9660;</span></div><div class="cb"><div class="cbi">Yes! Sellers have all customer abilities. Register as Seller to both list and buy products.</div></div></div>
+<div class="co"><div class="ch" onclick="tc(this)">What payment methods are available? <span class="aw">&#9660;</span></div><div class="cb"><div class="cbi"><b>Cash on Delivery (COD)</b> &mdash; pay on delivery. <b>UPI Payment</b> &mdash; pay via UPI app. <b>Credit/Debit Card</b> &mdash; pay with bank card.</div></div></div>
+<div class="co"><div class="ch" onclick="tc(this)">How do I track my order? <span class="aw">&#9660;</span></div><div class="cb"><div class="cbi">Go to <b>My Orders</b> from the user menu (or <kbd>/orders</kbd>). Each order shows status: Pending, Confirmed, Shipped, Delivered, or Cancelled.</div></div></div>
+<div class="co"><div class="ch" onclick="tc(this)">How do I use AI features as a seller? <span class="aw">&#9660;</span></div><div class="cb"><div class="cbi">On Seller Dashboard, enter product name first, then click <b>"AI Description"</b> or <b>"AI Image"</b>. Edit results before saving.</div></div></div>
+<div class="co"><div class="ch" onclick="tc(this)">Is shipping free? <span class="aw">&#9660;</span></div><div class="cb"><div class="cbi">Yes! All orders include <b>free shipping</b>.</div></div></div>
+<div class="co"><div class="ch" onclick="tc(this)">How many images can I add to a product? <span class="aw">&#9660;</span></div><div class="cb"><div class="cbi">Up to <b>5 images</b>. Formats: JPEG, PNG, WebP, GIF. Max 5MB each. Auto-compressed.</div></div></div>
+<div class="co"><div class="ch" onclick="tc(this)">Can I cancel an order? <span class="aw">&#9660;</span></div><div class="cb"><div class="cbi"><b>Buyers:</b> contact seller/admin. <b>Sellers:</b> cancel from Manage Orders. <b>Admins:</b> cancel from Admin Dashboard.</div></div></div>
+</div>
+
+<!-- CONTACT -->
+<div class="sec" id="s-contact">
+<h2 class="st">Contact & Support</h2>
+<p class="ss">Get help or reach out to us.</p>
+<div class="cd"><div class="ct"><div class="ci g">&#128222;</div> Contact Information</div>
+<div class="tw"><table>
+<tr><th>Channel</th><th>Details</th></tr>
+<tr><td><b>Address</b></td><td>Ganga Agri Innovation Foundation, New Delhi, India</td></tr>
+<tr><td><b>Phone</b></td><td>+91 XXXXX XXXXX</td></tr>
+<tr><td><b>Email</b></td><td>info@gaif.org</td></tr>
+<tr><td><b>Hours</b></td><td>Mon - Sat: 9:00 AM - 6:00 PM</td></tr>
+</table></div></div>
+<div class="cd"><div class="ct"><div class="ci b">&#9993;</div> Contact Form</div>
+<div class="sps">
+<div class="sp"><div class="sp-t">Visit the Contact Page</div><div class="sp-d">Click <b>Contact</b> in nav or visit <kbd>/contact</kbd>.</div></div>
+<div class="sp"><div class="sp-t">Fill in the Form</div><div class="sp-d">Name, Email, Subject, and Message.</div></div>
+<div class="sp"><div class="sp-t">Click "Send Message"</div><div class="sp-d">Confirmation message appears once sent.</div></div>
+</div></div>
+<div class="cd"><div class="ct"><div class="ci v">&#127760;</div> Social Media</div>
+<p>Follow us:</p>
+<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+<span class="tg b">Facebook</span><span class="tg b">Twitter</span><span class="tg v">Instagram</span><span class="tg r">YouTube</span>
+</div></div>
+</div>
+
+</div></div>
+
+<script>
+function go(id,el){
+document.querySelectorAll('.sec').forEach(function(s){s.classList.remove('ac')});
+var t=document.getElementById('s-'+id);
+if(t)t.classList.add('ac');
+document.querySelectorAll('.nl').forEach(function(l){l.classList.remove('ac')});
+if(el)el.classList.add('ac');
+var h=t?t.querySelector('.st'):null;
+document.getElementById('bct').textContent=h?h.textContent:id;
+document.getElementById('sb').classList.remove('op');
+document.getElementById('ov').classList.remove('op');
+window.scrollTo(0,0);
+}
+function tc(h){h.parentElement.classList.toggle('op')}
+function tS(){document.getElementById('sb').classList.toggle('op');document.getElementById('ov').classList.toggle('op')}
+</script>
+</body>
+</html>
