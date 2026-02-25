@@ -13,7 +13,7 @@ const ProductsPage = () => {
     const [selectedCategory, setSelectedCategory] = useState('all');
     const [sortBy, setSortBy] = useState('name');
 
-    const categories = ['all', 'Fertilizers', 'Seeds', 'Grains', 'Compost', 'Tools', 'Other'];
+    const categories = ['all', 'Fertilizers', 'Seeds', 'Grains', 'Compost', 'Tools', 'RCQ', 'Other'];
 
     useEffect(() => {
         const load = async () => {

@@ -31,7 +31,7 @@ const SellerDashboard = () => {
     category: 'Other',
   });
 
-  const categories = ['Fertilizers', 'Seeds', 'Grains', 'Compost', 'Tools', 'Other'];
+  const categories = ['Fertilizers', 'Seeds', 'Grains', 'Compost', 'Tools', 'RCQ', 'Other'];
 
   useEffect(() => {
     if (currentUser) {

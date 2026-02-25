@@ -17,7 +17,7 @@ export function useAuth() {
 // eslint-disable-next-line react/prop-types
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
-  const [userRole, setUserRole] = useState(null); // 'admin', 'seller', 'customer'
+  const [userRole, setUserRole] = useState(null); // 'admin', 'seller', 'vendor', 'customer'
   const [loading, setLoading] = useState(true);
 
   // Version counter to prevent onAuthStateChanged from overwriting
