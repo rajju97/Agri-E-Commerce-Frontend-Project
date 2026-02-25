@@ -17,6 +17,7 @@ export default function Layout() {
         { name: "Grains", icon: "fa-wheat-awn", description: "Organic grains for consumption and sowing." },
         { name: "Compost", icon: "fa-recycle", description: "Compost for enhancing soil nutrients." },
         { name: "Tools", icon: "fa-tools", description: "Essential farming tools and equipment." },
+        { name: "RCQ", icon: "fa-certificate", description: "RCQ certified quality agricultural products." },
     ];
 
     useEffect(() => {

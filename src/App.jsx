@@ -53,29 +53,29 @@ function App() {
             {/* Buyer Routes (any logged-in user can buy) */}
             <Route path="/cart" element={<Cart />} />
             <Route path="/checkout" element={
-              <ProtectedRoute allowedRoles={['customer', 'seller', 'admin']}>
+              <ProtectedRoute allowedRoles={['customer', 'seller', 'vendor', 'admin']}>
                 <Checkout />
               </ProtectedRoute>
             } />
             <Route path="/orders" element={
-              <ProtectedRoute allowedRoles={['customer', 'seller', 'admin']}>
+              <ProtectedRoute allowedRoles={['customer', 'seller', 'vendor', 'admin']}>
                 <OrderHistory />
               </ProtectedRoute>
             } />
             <Route path="/profile" element={
-              <ProtectedRoute allowedRoles={['customer', 'seller', 'admin']}>
+              <ProtectedRoute allowedRoles={['customer', 'seller', 'vendor', 'admin']}>
                 <Profile />
               </ProtectedRoute>
             } />
 
             {/* Seller Routes */}
             <Route path="/seller-dashboard" element={
-              <ProtectedRoute allowedRoles={['seller', 'admin']}>
+              <ProtectedRoute allowedRoles={['seller', 'vendor', 'admin']}>
                 <SellerDashboard />
               </ProtectedRoute>
             } />
             <Route path="/seller-orders" element={
-              <ProtectedRoute allowedRoles={['seller', 'admin']}>
+              <ProtectedRoute allowedRoles={['seller', 'vendor', 'admin']}>
                 <SellerOrders />
               </ProtectedRoute>
             } />

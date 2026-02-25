@@ -39,9 +39,9 @@ const NavBar = () => {
                     <NavLink to="/" className={navLinkClass}>Home</NavLink>
                     <NavLink to="/products" className={navLinkClass}>Products</NavLink>
 
-                    {currentUser && (userRole === 'seller' || userRole === 'admin') && (
+                    {currentUser && (userRole === 'seller' || userRole === 'vendor' || userRole === 'admin') && (
                         <NavLink to="/seller-dashboard" className={navLinkClass}>
-                            <i className="fas fa-store mr-1"></i>Seller
+                            <i className="fas fa-store mr-1"></i>{userRole === 'vendor' ? 'Vendor' : 'Seller'}
                         </NavLink>
                     )}
                     {currentUser && userRole === 'admin' && (
@@ -119,9 +119,9 @@ const NavBar = () => {
                     <NavLink to="/" onClick={closeMobile} className={navLinkClass}>Home</NavLink>
                     <NavLink to="/products" onClick={closeMobile} className={navLinkClass}>Products</NavLink>
 
-                    {currentUser && (userRole === 'seller' || userRole === 'admin') && (
+                    {currentUser && (userRole === 'seller' || userRole === 'vendor' || userRole === 'admin') && (
                         <NavLink to="/seller-dashboard" onClick={closeMobile} className={navLinkClass}>
-                            Seller Dashboard
+                            {userRole === 'vendor' ? 'Vendor' : 'Seller'} Dashboard
                         </NavLink>
                     )}
                     {currentUser && userRole === 'admin' && (

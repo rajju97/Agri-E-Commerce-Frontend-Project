@@ -16,7 +16,7 @@ const RegistrationPage = () => {
 
   // Redirect already logged-in users away from registration page
   if (currentUser && !success && !submitting) {
-    if (userRole === 'seller') return <Navigate to="/seller-dashboard" />;
+    if (userRole === 'seller' || userRole === 'vendor') return <Navigate to="/seller-dashboard" />;
     if (userRole === 'admin') return <Navigate to="/admin-dashboard" />;
     return <Navigate to="/" />;
   }
@@ -40,7 +40,7 @@ const RegistrationPage = () => {
       setSuccess(true);
       setNotification({ message: 'Registration Successful! Redirecting...', type: 'success' });
       setTimeout(() => {
-        if (data.role === 'seller') {
+        if (data.role === 'seller' || data.role === 'vendor') {
           navigate('/seller-dashboard');
         } else {
           navigate('/');
@@ -120,6 +120,7 @@ const RegistrationPage = () => {
                 <option value="" disabled>Select your role</option>
                 <option value="customer">Customer</option>
                 <option value="seller">Seller</option>
+                <option value="vendor">Vendor</option>
               </select>
               {errors.role && <p className="text-red-500 text-sm mt-1">{errors.role.message}</p>}
             </div>

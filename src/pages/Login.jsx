@@ -17,7 +17,7 @@ const Login = () => {
   // Redirect already logged-in users away from login page
   // (but not while submitting or showing success message)
   if (currentUser && !success && !submitting) {
-    if (userRole === 'seller') return <Navigate to="/seller-dashboard" />;
+    if (userRole === 'seller' || userRole === 'vendor') return <Navigate to="/seller-dashboard" />;
     if (userRole === 'admin') return <Navigate to="/admin-dashboard" />;
     return <Navigate to="/" />;
   }
@@ -45,7 +45,7 @@ const Login = () => {
       setTimeout(() => {
         if (role === 'admin') {
           navigate('/admin-dashboard');
-        } else if (role === 'seller') {
+        } else if (role === 'seller' || role === 'vendor') {
           navigate('/seller-dashboard');
         } else {
           navigate('/');
