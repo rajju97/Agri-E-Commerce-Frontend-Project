@@ -102,7 +102,7 @@ const Login = () => {
               </button>
             </div>
             <div className="text-center mt-4">
-            <small>Don't have an account? <NavLink to={'/register'} className="link link-primary">Register here</NavLink></small>
+            <small>Don&apos;t have an account? <NavLink to={'/register'} className="link link-primary">Register here</NavLink></small>
           </div>
           </form>
         </div>

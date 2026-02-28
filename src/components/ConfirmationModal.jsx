@@ -1,5 +1,3 @@
-import React from 'react';
-
 const ConfirmationModal = ({ id, title, message, onConfirm, confirmText = 'Confirm', cancelText = 'Cancel' }) => {
   return (
     <dialog id={id} className="modal">

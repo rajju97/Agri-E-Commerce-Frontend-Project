@@ -98,7 +98,6 @@ const AdminDashboard = () => {
 
   const totalRevenue = orders.filter(o => o.status === 'delivered').reduce((sum, o) => sum + (o.total || 0), 0);
   const sellers = users.filter(u => u.role === 'seller');
-  const customers = users.filter(u => u.role === 'customer');
 
   if (loading) return <div className="flex justify-center items-center h-64"><span className="loading loading-spinner loading-lg"></span></div>;
 
