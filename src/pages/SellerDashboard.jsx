@@ -191,20 +191,32 @@ const SellerDashboard = () => {
       return;
     }
 
+    const price = Number(formData.price);
+    const quantity = Number(formData.quantity);
+
+    if (!Number.isFinite(price) || price <= 0) {
+      setNotification({ message: 'Price must be a positive number.', type: 'error' });
+      return;
+    }
+    if (!Number.isInteger(quantity) || quantity < 0) {
+      setNotification({ message: 'Quantity must be a non-negative whole number.', type: 'error' });
+      return;
+    }
+
     setSaving(true);
     try {
       const productData = {
-        name: formData.name,
-        description: formData.description,
-        price: Number(formData.price),
-        quantity: Number(formData.quantity),
+        name: formData.name.trim(),
+        description: formData.description.trim(),
+        price,
+        quantity,
         images: formData.images,
         image: formData.images[0] || '',
         category: formData.category,
       };
 
       if (editingId) {
-        await updateProduct(editingId, productData);
+        await updateProduct(editingId, productData, currentUser.uid);
         setNotification({ message: 'Product updated successfully!', type: 'success' });
         setEditingId(null);
       } else {
@@ -263,7 +275,7 @@ const SellerDashboard = () => {
 
   const confirmDelete = async (id) => {
     try {
-      await deleteProduct(id);
+      await deleteProduct(id, currentUser.uid);
       setNotification({ message: 'Product deleted.', type: 'success' });
       loadData();
     } catch (error) {

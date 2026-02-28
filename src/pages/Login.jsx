@@ -2,13 +2,11 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { NavLink, useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../firebase';
 import Notification from '../components/Notification';
 
 const Login = () => {
   const { register, handleSubmit, formState: { errors } } = useForm();
-  const { login, currentUser, userRole, setUserRole } = useAuth();
+  const { login, currentUser, userRole, refreshUserRole } = useAuth();
   const navigate = useNavigate();
   const [notification, setNotification] = useState({ message: '', type: '' });
   const [submitting, setSubmitting] = useState(false);
@@ -29,17 +27,8 @@ const Login = () => {
       const userCredential = await login(data.email, data.password);
       const user = userCredential.user;
 
-      // Read role from Firestore and set it immediately.
-      // setUserRole increments a version counter that causes
-      // onAuthStateChanged's in-flight Firestore read to be discarded.
-      const userDoc = await getDoc(doc(db, "users", user.uid));
-      let role = 'customer';
-      if (userDoc.exists()) {
-        role = userDoc.data().role;
-      }
-      setUserRole(role);
+      const role = await refreshUserRole(user.uid);
 
-      // Show success message briefly then redirect
       setSuccess(true);
       setNotification({ message: 'Login Successful! Redirecting...', type: 'success' });
       setTimeout(() => {

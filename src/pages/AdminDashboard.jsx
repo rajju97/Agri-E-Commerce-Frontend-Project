@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getProducts, getAllUsers, getAllOrders, deleteProduct, deleteUser, updateOrderStatus } from '../services/db';
+import { useAuth } from '../context/AuthContext';
 import Notification from '../components/Notification';
 import ConfirmationModal from '../components/ConfirmationModal';
 
@@ -12,6 +13,7 @@ const statusColors = {
 };
 
 const AdminDashboard = () => {
+  const { currentUser } = useAuth();
   const [products, setProducts] = useState([]);
   const [users, setUsers] = useState([]);
   const [orders, setOrders] = useState([]);
@@ -55,7 +57,7 @@ const AdminDashboard = () => {
 
   const confirmProductDelete = async (id) => {
     try {
-      await deleteProduct(id);
+      await deleteProduct(id, currentUser.uid);
       setNotification({ message: 'Product deleted successfully.', type: 'success' });
       loadData();
     } catch (e) {
@@ -87,7 +89,7 @@ const AdminDashboard = () => {
 
   const handleOrderStatusUpdate = async (orderId, status) => {
     try {
-      await updateOrderStatus(orderId, status);
+      await updateOrderStatus(orderId, status, currentUser.uid);
       setNotification({ message: `Order status updated to ${status}.`, type: 'success' });
       loadData();
     } catch (e) {

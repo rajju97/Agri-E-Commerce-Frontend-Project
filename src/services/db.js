@@ -43,13 +43,26 @@ export const getProductById = async (id) => {
     return null;
 };
 
-export const updateProduct = async (id, data) => {
+export const updateProduct = async (id, data, currentUserId) => {
     const productRef = doc(db, "products", id);
+    const productSnap = await getDoc(productRef);
+    if (!productSnap.exists()) throw new Error("Product not found.");
+    if (productSnap.data().sellerId !== currentUserId) {
+        throw new Error("Unauthorized: you do not own this product.");
+    }
     await updateDoc(productRef, data);
 };
 
-export const deleteProduct = async (id) => {
+export const deleteProduct = async (id, currentUserId) => {
     const productRef = doc(db, "products", id);
+    const productSnap = await getDoc(productRef);
+    if (!productSnap.exists()) throw new Error("Product not found.");
+    if (productSnap.data().sellerId !== currentUserId) {
+        const userDoc = await getDoc(doc(db, "users", currentUserId));
+        if (!userDoc.exists() || userDoc.data().role !== 'admin') {
+            throw new Error("Unauthorized: you do not own this product.");
+        }
+    }
     await deleteDoc(productRef);
 };
 
@@ -72,8 +85,10 @@ export const getUserProfile = async (uid) => {
 };
 
 export const updateUserProfile = async (uid, data) => {
+    const { role, ...safeData } = data;
+    void role;
     const userRef = doc(db, "users", uid);
-    await updateDoc(userRef, data);
+    await updateDoc(userRef, safeData);
 };
 
 export const getAllUsers = async () => {
@@ -112,8 +127,22 @@ export const getAllOrders = async () => {
     return querySnapshot.docs.map(d => ({ ...d.data(), id: d.id }));
 };
 
-export const updateOrderStatus = async (orderId, status) => {
+export const updateOrderStatus = async (orderId, status, currentUserId) => {
     const orderRef = doc(db, "orders", orderId);
+    const orderSnap = await getDoc(orderRef);
+    if (!orderSnap.exists()) throw new Error("Order not found.");
+    const order = orderSnap.data();
+
+    if (order.sellerId !== currentUserId) {
+        const userDoc = await getDoc(doc(db, "users", currentUserId));
+        if (!userDoc.exists() || userDoc.data().role !== 'admin') {
+            throw new Error("Unauthorized: you cannot update this order.");
+        }
+    }
+
+    const allowed = ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled'];
+    if (!allowed.includes(status)) throw new Error("Invalid status value.");
+
     await updateDoc(orderRef, { status, updatedAt: serverTimestamp() });
 };
 

@@ -8,7 +8,7 @@ import Notification from './Notification';
 
 const RegistrationPage = () => {
   const { register, handleSubmit, watch, formState: { errors } } = useForm();
-  const { signup, currentUser, userRole, setUserRole } = useAuth();
+  const { signup, currentUser, userRole, refreshUserRole } = useAuth();
   const navigate = useNavigate();
   const [notification, setNotification] = useState({ message: '', type: '' });
   const [submitting, setSubmitting] = useState(false);
@@ -28,19 +28,22 @@ const RegistrationPage = () => {
       const userCredential = await signup(data.email, data.password);
       const user = userCredential.user;
 
-      setUserRole(data.role);
+      const allowedRoles = ['customer', 'seller'];
+      const chosenRole = allowedRoles.includes(data.role) ? data.role : 'customer';
 
       await setDoc(doc(db, "users", user.uid), {
         email: data.email,
         mobile: data.mobile,
-        role: data.role,
+        role: chosenRole,
         uid: user.uid
       });
+
+      const role = await refreshUserRole(user.uid);
 
       setSuccess(true);
       setNotification({ message: 'Registration Successful! Redirecting...', type: 'success' });
       setTimeout(() => {
-        if (data.role === 'seller') {
+        if (role === 'seller') {
           navigate('/seller-dashboard');
         } else {
           navigate('/');

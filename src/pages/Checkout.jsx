@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { createOrder } from '../services/db';
+import { createOrder, getProductById } from '../services/db';
 import { clearCart } from '../dispatchers';
 import Notification from '../components/Notification';
 
@@ -80,6 +80,27 @@ const Checkout = () => {
         setPlacing(true);
 
         try {
+            // Fetch canonical prices from the database to prevent client-side price manipulation
+            const verifiedItems = await Promise.all(
+                cartItems.map(async (item) => {
+                    const product = await getProductById(item.id);
+                    if (!product) throw new Error(`Product "${item.name}" is no longer available.`);
+                    if (product.quantity < item.quantity) {
+                        throw new Error(`Insufficient stock for "${product.name}". Available: ${product.quantity}.`);
+                    }
+                    return {
+                        productId: product.id,
+                        name: product.name,
+                        price: product.price,
+                        quantity: item.quantity,
+                        sellerId: product.sellerId,
+                        image: product.images?.[0] || product.image || '',
+                    };
+                })
+            );
+
+            const verifiedTotal = verifiedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
             let paymentId = null;
             let paymentStatus = 'cod';
 
@@ -93,7 +114,7 @@ const Checkout = () => {
 
                 try {
                     const paymentResponse = await initiateRazorpayPayment({
-                        amount: totalPrice,
+                        amount: verifiedTotal,
                         buyerEmail: currentUser.email,
                         buyerPhone: formData.phone,
                         buyerName: formData.fullName,
@@ -107,23 +128,17 @@ const Checkout = () => {
                 }
             }
 
-            // Group items by seller
+            // Group verified items by seller
             const sellerGroups = {};
-            cartItems.forEach(item => {
+            verifiedItems.forEach(item => {
                 const sellerId = item.sellerId || 'unknown';
                 if (!sellerGroups[sellerId]) {
                     sellerGroups[sellerId] = [];
                 }
-                sellerGroups[sellerId].push({
-                    productId: item.id,
-                    name: item.name,
-                    price: item.price,
-                    quantity: item.quantity,
-                    image: item.images?.[0] || item.image || '',
-                });
+                sellerGroups[sellerId].push(item);
             });
 
-            // Create separate orders per seller
+            // Create separate orders per seller using server-verified prices
             let lastOrderId = '';
             for (const [sellerId, items] of Object.entries(sellerGroups)) {
                 const orderTotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
@@ -134,12 +149,12 @@ const Checkout = () => {
                     items,
                     total: orderTotal,
                     shippingAddress: {
-                        fullName: formData.fullName,
-                        phone: formData.phone,
-                        address: formData.address,
-                        city: formData.city,
-                        state: formData.state,
-                        pincode: formData.pincode,
+                        fullName: formData.fullName.trim(),
+                        phone: formData.phone.trim(),
+                        address: formData.address.trim(),
+                        city: formData.city.trim(),
+                        state: formData.state.trim(),
+                        pincode: formData.pincode.trim(),
                     },
                     paymentMethod: formData.paymentMethod,
                     paymentStatus,
