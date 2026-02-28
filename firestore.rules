@@ -2,31 +2,67 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Users — anyone authenticated can read; only the owner can write their own doc
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return request.auth.uid == uid;
+    }
+
+    function getUserRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && getUserRole() == 'admin';
+    }
+
+    function isSeller() {
+      return isSignedIn() && getUserRole() == 'seller';
+    }
+
+    // Users — only the owner or an admin can read a user doc; only the owner can write their own doc
     match /users/{userId} {
-      allow read: if request.auth != null;
-      allow create, update: if request.auth != null && request.auth.uid == userId;
+      allow read: if isSignedIn() && (isOwner(userId) || isAdmin());
+      allow create: if isSignedIn() && isOwner(userId);
+      allow update: if isSignedIn() && isOwner(userId)
+                    && (!request.resource.data.keys().hasAny(['role'])
+                        || request.resource.data.role == resource.data.role);
       allow delete: if false;
     }
 
-    // Products — public read; authenticated users can create/update/delete
+    // Products — public read; sellers can only create/update/delete their own products; admins can delete any
     match /products/{productId} {
       allow read: if true;
-      allow create: if request.auth != null;
-      allow update, delete: if request.auth != null;
+      allow create: if isSignedIn() && (isSeller() || isAdmin())
+                    && request.resource.data.sellerId == request.auth.uid;
+      allow update: if isSignedIn()
+                    && (resource.data.sellerId == request.auth.uid || isAdmin());
+      allow delete: if isSignedIn()
+                    && (resource.data.sellerId == request.auth.uid || isAdmin());
     }
 
-    // Orders — authenticated users can create and read their own orders
+    // Orders — buyers and sellers can only access their own orders; admins can access all
     match /orders/{orderId} {
-      allow read: if request.auth != null;
-      allow create: if request.auth != null;
-      allow update: if request.auth != null;
+      allow read: if isSignedIn()
+                  && (resource.data.buyerId == request.auth.uid
+                      || resource.data.sellerId == request.auth.uid
+                      || isAdmin());
+      allow create: if isSignedIn()
+                    && request.resource.data.buyerId == request.auth.uid;
+      allow update: if isSignedIn()
+                    && (resource.data.sellerId == request.auth.uid || isAdmin())
+                    && request.resource.data.diff(resource.data).affectedKeys()
+                       .hasOnly(['status', 'updatedAt']);
     }
 
-    // Reviews — public read; authenticated users can create
+    // Reviews — public read; authenticated users can create their own reviews only
     match /reviews/{reviewId} {
       allow read: if true;
-      allow create: if request.auth != null;
+      allow create: if isSignedIn()
+                    && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if false;
     }
   }
 }

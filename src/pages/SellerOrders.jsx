@@ -45,7 +45,7 @@ const SellerOrders = () => {
 
     const handleStatusUpdate = async (orderId, newStatus) => {
         try {
-            await updateOrderStatus(orderId, newStatus);
+            await updateOrderStatus(orderId, newStatus, currentUser.uid);
             setNotification({ message: `Order status updated to ${newStatus}.`, type: 'success' });
             await loadOrders();
         } catch (error) {
